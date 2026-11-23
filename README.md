@@ -18,6 +18,14 @@ consistent identity: **Lumen Dusk**, deep navy surfaces with an amber accent.
 - [docs/THIRD-PARTY.md](docs/THIRD-PARTY.md): what is original and what is reused
 - [docs/TESTING.md](docs/TESTING.md): verification checklist and demo script
 
+## Status
+
+The panel's logic (system readers, configuration) is covered by unit tests, and the theme
+generator, scripts and XML are checked in CI. The ISO itself has **not yet been built and
+booted**: the build was authored on a machine without Docker or QEMU. Run the steps below,
+then work through [docs/TESTING.md](docs/TESTING.md) and record the results here before
+relying on any behaviour described in the docs.
+
 ## Build the ISO
 
 The build runs inside a Debian 13 container, so the host can be any Linux, macOS or Windows
