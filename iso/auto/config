@@ -1,0 +1,43 @@
+#!/bin/sh
+# live-build configuration for Lumen Linux (Debian 13 "trixie", amd64).
+#
+# `lb config` re-runs this script, so every build option lives in one place.
+#
+# Environment knobs:
+#   LUMEN_MIRROR    Debian mirror (default: http://deb.debian.org/debian/)
+#   LUMEN_SNAPSHOT  e.g. 20261101T000000Z. Pins the package set to a
+#                   snapshot.debian.org archive for repeatable builds.
+set -e
+
+MIRROR=${LUMEN_MIRROR:-http://deb.debian.org/debian/}
+
+# Extra lb options are collected in the positional parameters so that values
+# containing spaces survive intact.
+if [ -n "${LUMEN_SNAPSHOT:-}" ]; then
+    MIRROR="http://snapshot.debian.org/archive/debian/${LUMEN_SNAPSHOT}/"
+    # Snapshot archives are frozen: the security/updates suites would not match
+    # them, and their Release files are past their Valid-Until date.
+    set -- --security false --updates false \
+        --apt-options "--yes -oAcquire::Check-Valid-Until=false" "$@"
+fi
+
+lb config noauto \
+    --distribution trixie \
+    --architectures amd64 \
+    --archive-areas "main contrib non-free-firmware" \
+    --mirror-bootstrap "$MIRROR" \
+    --mirror-chroot "$MIRROR" \
+    --mirror-binary "http://deb.debian.org/debian/" \
+    --linux-flavours amd64 \
+    --binary-images iso-hybrid \
+    --bootloaders "grub-efi,syslinux" \
+    --debian-installer none \
+    --apt-recommends false \
+    --apt-indices false \
+    --memtest none \
+    --checksums sha256 \
+    --iso-application "Lumen Linux" \
+    --iso-publisher "Lumen Linux Project" \
+    --iso-volume "LUMEN_1_0" \
+    --bootappend-live "boot=live components quiet username=lumen hostname=lumen locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC" \
+    "$@"

@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = configure ]; then
+    # Point greetd at /etc/greetd/lumen.toml instead of editing the greetd
+    # package's own config file. Written here (not shipped statically) so the
+    # ExecStart path matches whatever location this Debian release uses.
+    greetd_bin=$(command -v greetd 2>/dev/null || echo /usr/sbin/greetd)
+    mkdir -p /etc/systemd/system/greetd.service.d
+    cat >/etc/systemd/system/greetd.service.d/lumen.conf <<EOF
+# Managed by lumen-desktop.
+[Service]
+ExecStart=
+ExecStart=$greetd_bin --config /etc/greetd/lumen.toml
+EOF
+fi
+exit 0

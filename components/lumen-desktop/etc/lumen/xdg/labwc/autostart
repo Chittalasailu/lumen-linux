@@ -11,7 +11,11 @@ dbus-update-activation-environment --systemd \
 swaybg -m fill -i /usr/share/backgrounds/lumen/lumen-dusk.png >/dev/null 2>&1 &
 
 # notifications: layer-shell overlay, implements org.freedesktop.Notifications
-mako >/dev/null 2>&1 &
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/mako/config" ]; then
+    mako >/dev/null 2>&1 &
+else
+    mako --config /etc/lumen/xdg/mako/config >/dev/null 2>&1 &
+fi
 
 # polkit authentication dialogs (mounting, network settings, ...)
 lxpolkit >/dev/null 2>&1 &

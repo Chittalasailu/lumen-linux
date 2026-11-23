@@ -1,0 +1,19 @@
+# greetd configuration for Lumen Linux.
+#
+# greetd is a minimal login manager with no GUI toolkit of its own: it speaks a
+# small JSON protocol to any greeter, runs sessions through PAM/logind (so the
+# session is a real "wayland" logind session) and needs no X server.
+#
+# This file is deliberately NOT /etc/greetd/config.toml, which belongs to the
+# greetd package. lumen-desktop's postinst adds a systemd drop-in that starts
+# greetd with `--config /etc/greetd/lumen.toml`, so the two packages never
+# fight over a file. The live ISO appends an [initial_session] autologin block
+# at image build time (iso/config/hooks/live/0100-lumen-live.hook.chroot);
+# an installed system shows the greeter.
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "/usr/sbin/agreety --cmd /usr/bin/lumen-session"
+user = "_greetd"

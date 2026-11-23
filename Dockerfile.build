@@ -1,0 +1,15 @@
+# Build environment for the Lumen Linux ISO: a clean Debian 13 with live-build.
+# Pinning the build tools to the same release as the target keeps results
+# independent of the host distribution.
+FROM debian:trixie
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        live-build debootstrap squashfs-tools xorriso mtools dosfstools \
+        grub-efi-amd64-bin grub-pc-bin grub-common syslinux syslinux-common isolinux \
+        python3 dpkg-dev git rsync fakeroot zstd xz-utils ca-certificates \
+        procps make \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /work
+CMD ["./build.sh"]

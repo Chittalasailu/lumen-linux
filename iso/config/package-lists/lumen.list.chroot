@@ -1,0 +1,89 @@
+# Lumen Linux package selection (installed with --apt-recommends false, so
+# every runtime dependency is named here on purpose).
+
+# --- Lumen components (built from this repository, see packaging/) -----------
+lumen-desktop
+lumen-panel
+lumen-launcher
+
+# --- Wayland desktop stack ----------------------------------------------------
+labwc
+xwayland
+greetd
+foot
+fuzzel
+mako-notifier
+swaybg
+swaylock
+grim
+slurp
+wl-clipboard
+wlr-randr
+lxpolkit
+libnotify-bin
+brightnessctl
+
+# --- Panel runtime (GTK3 + layer-shell bindings) ---------------------------------
+python3
+python3-gi
+gir1.2-gtk-3.0
+gir1.2-gtklayershell-0.1
+libgtk-layer-shell0
+
+# --- Session plumbing -----------------------------------------------------------------
+dbus-user-session
+libpam-systemd
+polkitd
+pkexec
+xdg-utils
+xdg-user-dirs
+xdg-desktop-portal
+xdg-desktop-portal-wlr
+xdg-desktop-portal-gtk
+
+# --- Graphics (software rendering works everywhere, Mesa for real/virtual GPUs) ----
+libgl1-mesa-dri
+libegl1
+libgles2
+mesa-vulkan-drivers
+
+# --- Audio / network -----------------------------------------------------------------------
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+alsa-utils
+pavucontrol
+network-manager
+network-manager-gnome
+
+# --- Look and feel -------------------------------------------------------------------------------
+fonts-inter
+fonts-jetbrains-mono
+fonts-noto-color-emoji
+papirus-icon-theme
+adwaita-icon-theme
+librsvg2-bin
+librsvg2-common
+
+# --- Applications -------------------------------------------------------------------------------------
+thunar
+gvfs
+firefox-esr
+mousepad
+
+# --- Base system -------------------------------------------------------------------------------------------
+sudo
+locales
+console-setup
+keyboard-configuration
+bash-completion
+nano
+less
+curl
+htop
+fastfetch
+
+# --- Virtual machine guest support (QEMU / KVM / VirtualBox) --------------------------------------------
+qemu-guest-agent
+spice-vdagent

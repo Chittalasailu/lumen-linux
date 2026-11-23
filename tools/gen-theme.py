@@ -29,8 +29,8 @@ TARGETS = {
     "fuzzel.ini.tpl": "components/lumen-launcher/data/fuzzel.ini",
     "labwc-themerc.tpl": "components/lumen-desktop/usr/share/themes/Lumen/openbox-3/themerc",
     "gtk3.css.tpl": "components/lumen-desktop/usr/share/themes/Lumen/gtk-3.0/gtk.css",
-    "foot.ini.tpl": "components/lumen-desktop/etc/xdg/foot/foot.ini",
-    "mako.conf.tpl": "components/lumen-desktop/etc/xdg/mako/config",
+    "foot.ini.tpl": "components/lumen-desktop/etc/lumen/xdg/foot/foot.ini",
+    "mako.conf.tpl": "components/lumen-desktop/etc/lumen/xdg/mako/config",
     "wallpaper.svg.tpl": "components/lumen-desktop/usr/share/backgrounds/lumen/lumen-dusk.svg",
 }
 

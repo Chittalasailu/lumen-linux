@@ -10,6 +10,12 @@ export XDG_SESSION_TYPE=wayland
 export XDG_SESSION_DESKTOP=lumen
 export XDG_CURRENT_DESKTOP=labwc:wlroots
 
+# Distribution defaults live in /etc/lumen/xdg. Putting that directory *first*
+# in XDG_CONFIG_DIRS makes labwc, foot and GTK pick our files up, while a
+# user's ~/.config (XDG_CONFIG_HOME) still beats them and no file collides with
+# the stock packages (foot and mako ship their own /etc/xdg files).
+export XDG_CONFIG_DIRS="/etc/lumen/xdg:${XDG_CONFIG_DIRS:-/etc/xdg}"
+
 logdir="${XDG_STATE_HOME:-$HOME/.local/state}/lumen"
 mkdir -p "$logdir"
 

@@ -1,0 +1,55 @@
+name: build-iso
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Unit tests, theme freshness, script syntax
+        run: make test
+      - name: shellcheck
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck build.sh run-qemu.sh packaging/build-debs.sh \
+            components/lumen-launcher/bin/lumen-launcher \
+            components/lumen-panel/bin/lumen-panel \
+            components/lumen-desktop/usr/bin/lumen-session \
+            components/lumen-desktop/usr/bin/lumen-screenshot \
+            packaging/scripts/* iso/auto/* iso/config/hooks/live/*
+
+  iso:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free disk space (the image build needs ~10 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android
+          df -h /
+      - name: Build ISO in the Debian 13 container
+        run: make iso
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lumen-linux-iso
+          path: |
+            dist/*.iso
+            dist/*.sha256
+          retention-days: 14
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.iso
+            dist/*.sha256

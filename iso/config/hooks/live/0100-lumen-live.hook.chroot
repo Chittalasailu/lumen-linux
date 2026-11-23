@@ -1,0 +1,56 @@
+#!/bin/sh
+# Final image customisation, run inside the chroot after all packages are installed.
+set -e
+
+# --- wallpaper: swaybg cannot read SVG, so rasterise the generated one -------------
+rsvg-convert -w 1920 -h 1080 \
+    /usr/share/backgrounds/lumen/lumen-dusk.svg \
+    -o /usr/share/backgrounds/lumen/lumen-dusk.png
+
+# --- identity -------------------------------------------------------------------------------
+# Keep ID=debian so tooling that keys off it keeps working; change what users see.
+sed -i \
+    -e 's/^NAME=.*/NAME="Lumen Linux"/' \
+    -e 's/^PRETTY_NAME=.*/PRETTY_NAME="Lumen Linux 1.0 (based on Debian GNU\/Linux 13)"/' \
+    -e 's|^HOME_URL=.*|HOME_URL="https://github.com/lumen-linux/lumen-linux"|' \
+    /usr/lib/os-release
+printf 'Lumen Linux 1.0 \\n \\l\n\n' > /etc/issue
+echo "Lumen Linux 1.0" > /etc/issue.net
+
+# --- login: autologin the live user into the Lumen session -------------------------
+cat >> /etc/greetd/lumen.toml <<'EOF'
+
+# Live ISO only: log the live user straight into the desktop (once per boot).
+[initial_session]
+command = "/usr/bin/lumen-session"
+user = "lumen"
+EOF
+
+# The live user is created by live-config at boot, so greetd must wait for it.
+mkdir -p /etc/systemd/system/greetd.service.d
+cat > /etc/systemd/system/greetd.service.d/live.conf <<'EOF'
+[Unit]
+After=live-config.service
+Wants=live-config.service
+EOF
+
+systemctl enable greetd.service
+systemctl set-default graphical.target
+# Only one display manager may own display-manager.service.
+for dm in gdm3 lightdm sddm; do
+    systemctl disable "$dm.service" 2>/dev/null || true
+done
+
+# --- live user defaults --------------------------------------------------------------------
+# live-config creates user "lumen" (password: live). Make sure it can use the
+# GPU, audio and network devices without further setup.
+mkdir -p /etc/live/config.conf.d
+cat > /etc/live/config.conf.d/lumen.conf <<'EOF'
+LIVE_USER_DEFAULT_GROUPS="audio cdrom dip floppy video plugdev netdev render input sudo"
+EOF
+
+# --- caches -----------------------------------------------------------------------------------------
+fc-cache -f >/dev/null 2>&1 || true
+for theme in Papirus-Dark Adwaita; do
+    [ -d "/usr/share/icons/$theme" ] && gtk-update-icon-cache -q -f "/usr/share/icons/$theme" 2>/dev/null || true
+done
