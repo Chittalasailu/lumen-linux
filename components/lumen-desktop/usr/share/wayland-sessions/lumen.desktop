@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Lumen
+Comment=Lumen Linux desktop (labwc Wayland session)
+Exec=/usr/bin/lumen-session
+Type=Application
+DesktopNames=labwc;wlroots

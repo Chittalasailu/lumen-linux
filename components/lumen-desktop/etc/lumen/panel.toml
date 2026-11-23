@@ -1,0 +1,15 @@
+# Lumen Linux distribution defaults for lumen-panel.
+# Users override individual keys in ~/.config/lumen/panel.toml; the panel
+# reloads automatically when that file changes.
+
+[panel]
+position = "top"
+height = 36
+
+[layout]
+left   = ["launcher"]
+center = ["clock"]
+right  = ["cpu", "memory", "network", "volume", "battery", "power"]
+
+[power]
+lock = ["swaylock", "-f", "-c", "0e1220"]

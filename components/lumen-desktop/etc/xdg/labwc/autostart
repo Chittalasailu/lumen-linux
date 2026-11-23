@@ -1,0 +1,20 @@
+#!/bin/sh
+# Started by labwc once the Wayland socket is up. Everything is backgrounded so
+# one slow client cannot delay the others.
+
+# Hand the compositor's environment to systemd --user and D-Bus activation, so
+# services started on demand (portals, notification helpers) find WAYLAND_DISPLAY.
+dbus-update-activation-environment --systemd \
+    WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP &
+
+# wallpaper: wl_surface on the background layer (zwlr_layer_shell_v1)
+swaybg -m fill -i /usr/share/backgrounds/lumen/lumen-dusk.png >/dev/null 2>&1 &
+
+# notifications: layer-shell overlay, implements org.freedesktop.Notifications
+mako >/dev/null 2>&1 &
+
+# polkit authentication dialogs (mounting, network settings, ...)
+lxpolkit >/dev/null 2>&1 &
+
+# the panel built from scratch for this distribution
+lumen-panel >"${XDG_STATE_HOME:-$HOME/.local/state}/lumen/panel.log" 2>&1 &

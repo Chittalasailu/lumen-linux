@@ -1,0 +1,50 @@
+#!/bin/sh
+# lumen-launcher: Lumen's integration layer around fuzzel.
+#
+# fuzzel is the upstream application launcher (a wlr-layer-shell client).
+# What this wrapper adds, and why:
+#
+#   * toggle    : the same key/button that opens the launcher also closes it
+#   * layered   : user config (~/.config/lumen/launcher.ini) wins over the
+#                 distribution config generated from the shared palette
+#   * modes     : one entry point for apps (default), --run and --dmenu
+#   * graceful  : a clear notification instead of a silent failure
+#
+# Placement note: fuzzel anchors itself top-left with a zero exclusive zone.
+# The compositor positions zero-zone layer surfaces inside the *usable area*,
+# i.e. after subtracting zones reserved by other layer surfaces, so the
+# launcher opens just below lumen-panel without knowing the panel's height.
+
+set -eu
+
+SYSTEM_CONF=/usr/share/lumen-launcher/fuzzel.ini
+USER_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/lumen/launcher.ini"
+
+if ! command -v fuzzel >/dev/null 2>&1; then
+    command -v notify-send >/dev/null 2>&1 &&
+        notify-send -u critical "Launcher unavailable" "fuzzel is not installed"
+    echo "lumen-launcher: fuzzel not found" >&2
+    exit 1
+fi
+
+# Toggle: a second invocation closes the running launcher.
+if pgrep -x fuzzel >/dev/null 2>&1; then
+    pkill -x fuzzel
+    exit 0
+fi
+
+conf=$SYSTEM_CONF
+[ -f "$USER_CONF" ] && conf=$USER_CONF
+
+mode=${1:-apps}
+case "$mode" in
+    apps)  exec fuzzel --config "$conf" ;;
+    --run) shift; exec fuzzel --config "$conf" --list-executables-in-path "$@" ;;
+    --dmenu) shift; exec fuzzel --config "$conf" --dmenu "$@" ;;
+    -h|--help)
+        echo "usage: lumen-launcher [--run | --dmenu [fuzzel args]]"
+        exit 0 ;;
+    *)
+        echo "lumen-launcher: unknown mode '$mode'" >&2
+        exit 2 ;;
+esac

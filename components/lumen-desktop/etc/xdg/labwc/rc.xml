@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<!--
+  Lumen Linux: labwc compositor configuration (system default).
+  Users override by copying this file to ~/.config/labwc/rc.xml.
+  Reload without logging out: Super+Shift+R (the Reconfigure action)
+-->
+<labwc_config>
+
+  <core>
+    <decoration>server</decoration>
+    <gap>6</gap>
+    <adaptiveSync>no</adaptiveSync>
+  </core>
+
+  <theme>
+    <name>Lumen</name>
+    <cornerRadius>10</cornerRadius>
+    <font place="ActiveWindow"><name>Inter</name><size>10</size><weight>bold</weight></font>
+    <font place="InactiveWindow"><name>Inter</name><size>10</size></font>
+    <font place="MenuItem"><name>Inter</name><size>10</size></font>
+    <font place="OnScreenDisplay"><name>Inter</name><size>10</size></font>
+  </theme>
+
+  <focus>
+    <followMouse>no</followMouse>
+    <raiseOnFocus>yes</raiseOnFocus>
+  </focus>
+
+  <placement>
+    <policy>cascade</policy>
+  </placement>
+
+  <snapping>
+    <range>12</range>
+    <topMaximize>yes</topMaximize>
+  </snapping>
+
+  <resistance>
+    <screenEdgeStrength>20</screenEdgeStrength>
+  </resistance>
+
+  <desktops>
+    <number>4</number>
+    <popupTime>800</popupTime>
+    <names>
+      <name>One</name>
+      <name>Two</name>
+      <name>Three</name>
+      <name>Four</name>
+    </names>
+  </desktops>
+
+  <!--
+    Keybindings. We do not include <default/> so that every binding the
+    desktop ships is visible here. W = Super, A = Alt, S = Shift, C = Ctrl.
+  -->
+  <keyboard>
+    <repeatRate>30</repeatRate>
+    <repeatDelay>300</repeatDelay>
+
+    <!-- launch -->
+    <keybind key="W-space"><action name="Execute" command="lumen-launcher"/></keybind>
+    <keybind key="A-F2"><action name="Execute" command="lumen-launcher --run"/></keybind>
+    <keybind key="W-Return"><action name="Execute" command="foot"/></keybind>
+    <keybind key="W-e"><action name="Execute" command="thunar"/></keybind>
+    <keybind key="W-b"><action name="Execute" command="firefox-esr"/></keybind>
+    <keybind key="W-l"><action name="Execute" command="swaylock -f -c 0e1220"/></keybind>
+    <keybind key="Print"><action name="Execute" command="lumen-screenshot area"/></keybind>
+    <keybind key="S-Print"><action name="Execute" command="lumen-screenshot screen"/></keybind>
+
+    <!-- windows -->
+    <keybind key="W-q"><action name="Close"/></keybind>
+    <keybind key="A-F4"><action name="Close"/></keybind>
+    <keybind key="A-Tab"><action name="NextWindow"/></keybind>
+    <keybind key="A-S-Tab"><action name="PreviousWindow"/></keybind>
+    <keybind key="W-Up"><action name="ToggleMaximize"/></keybind>
+    <keybind key="W-f"><action name="ToggleFullscreen"/></keybind>
+    <keybind key="W-Down"><action name="Iconify"/></keybind>
+    <keybind key="W-Left"><action name="SnapToEdge"><direction>left</direction></action></keybind>
+    <keybind key="W-Right"><action name="SnapToEdge"><direction>right</direction></action></keybind>
+
+    <!-- workspaces -->
+    <keybind key="W-1"><action name="GoToDesktop"><to>1</to></action></keybind>
+    <keybind key="W-2"><action name="GoToDesktop"><to>2</to></action></keybind>
+    <keybind key="W-3"><action name="GoToDesktop"><to>3</to></action></keybind>
+    <keybind key="W-4"><action name="GoToDesktop"><to>4</to></action></keybind>
+    <keybind key="W-S-1"><action name="SendToDesktop"><to>1</to></action></keybind>
+    <keybind key="W-S-2"><action name="SendToDesktop"><to>2</to></action></keybind>
+    <keybind key="W-S-3"><action name="SendToDesktop"><to>3</to></action></keybind>
+    <keybind key="W-S-4"><action name="SendToDesktop"><to>4</to></action></keybind>
+
+    <!-- session -->
+    <keybind key="W-S-r"><action name="Reconfigure"/></keybind>
+    <keybind key="W-S-e"><action name="Exit"/></keybind>
+
+    <!-- media keys (PipeWire through WirePlumber) -->
+    <keybind key="XF86AudioRaiseVolume">
+      <action name="Execute" command="wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"/>
+    </keybind>
+    <keybind key="XF86AudioLowerVolume">
+      <action name="Execute" command="wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"/>
+    </keybind>
+    <keybind key="XF86AudioMute">
+      <action name="Execute" command="wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"/>
+    </keybind>
+    <keybind key="XF86MonBrightnessUp"><action name="Execute" command="brightnessctl set 5%+"/></keybind>
+    <keybind key="XF86MonBrightnessDown"><action name="Execute" command="brightnessctl set 5%-"/></keybind>
+  </keyboard>
+
+  <!-- Mouse: labwc's built-in defaults (drag/resize, titlebar buttons, root menu) -->
+  <mouse>
+    <default/>
+  </mouse>
+
+  <libinput>
+    <device category="touchpad">
+      <tap>yes</tap>
+      <naturalScroll>yes</naturalScroll>
+      <disableWhileTyping>yes</disableWhileTyping>
+    </device>
+  </libinput>
+
+</labwc_config>

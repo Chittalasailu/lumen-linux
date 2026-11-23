@@ -1,0 +1,14 @@
+# greetd: minimal login manager with no GUI toolkit of its own.
+# Why greetd: it speaks a tiny JSON IPC to any greeter, runs the session through
+# PAM/logind (so it is a proper "wayland" logind session) and needs no X server.
+#
+# The live ISO adds an [initial_session] autologin block at image build time
+# (iso/config/hooks/live/0100-lumen-live.hook.chroot). An installed system
+# keeps this file as is and shows the greeter.
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "/usr/sbin/agreety --cmd /usr/bin/lumen-session"
+user = "_greetd"

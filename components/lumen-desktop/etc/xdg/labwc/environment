@@ -1,0 +1,11 @@
+XCURSOR_THEME=Adwaita
+XCURSOR_SIZE=24
+XDG_CURRENT_DESKTOP=labwc:wlroots
+# Let wlroots fall back to the pixman software renderer when there is no GPU
+# acceleration (QEMU's default VGA, some VMs). Hardware GL is used when present.
+WLR_RENDERER_ALLOW_SOFTWARE=1
+# Ask toolkits to speak native Wayland.
+MOZ_ENABLE_WAYLAND=1
+QT_QPA_PLATFORM=wayland;xcb
+SDL_VIDEODRIVER=wayland,x11
+_JAVA_AWT_WM_NONREPARENTING=1

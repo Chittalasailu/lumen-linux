@@ -1,0 +1,16 @@
+#!/bin/sh
+# lumen-session: start the Lumen desktop (a labwc Wayland session).
+#
+# greetd (or any display manager that reads wayland-sessions/*.desktop)
+# runs this as the logged-in user. It sets the session identity, makes sure
+# a log exists for debugging, and replaces itself with the compositor, so
+# the compositor *is* the session leader: when labwc exits, the session ends.
+
+export XDG_SESSION_TYPE=wayland
+export XDG_SESSION_DESKTOP=lumen
+export XDG_CURRENT_DESKTOP=labwc:wlroots
+
+logdir="${XDG_STATE_HOME:-$HOME/.local/state}/lumen"
+mkdir -p "$logdir"
+
+exec labwc "$@" >"$logdir/session.log" 2>&1
