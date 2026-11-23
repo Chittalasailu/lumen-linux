@@ -1,0 +1,32 @@
+# Lumen Dusk: the single source of truth for the desktop's visual identity.
+#
+# Every themed artefact (compositor decorations, panel CSS, launcher, GTK
+# theme, terminal, notifications, wallpaper) is generated from this file by
+# tools/gen-theme.py. Change a value here, run `make theme`, rebuild.
+
+name = "Lumen Dusk"
+
+[colors]
+bg          = "#0e1220"   # desktop / deepest layer
+surface     = "#161c2e"   # panel, menus, launcher
+surface_alt = "#1f2740"   # hovered / raised surfaces
+border      = "#2a3454"
+text        = "#e6e9f5"
+text_dim    = "#8e97b8"
+accent      = "#ffb454"   # amber: focus, selection, primary action
+accent_alt  = "#5ad1c4"   # teal: secondary highlights
+danger      = "#ff6b7a"
+warn        = "#f5c451"
+ok          = "#7bd88f"
+
+[fonts]
+ui_family   = "Inter"
+ui_size     = 10
+mono_family = "JetBrains Mono"
+mono_size   = 10
+
+[metrics]
+radius       = 10
+border_width = 2
+panel_height = 36
+gap          = 6

@@ -1,0 +1,96 @@
+/* GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit. */
+/* lumen-panel stylesheet. Palette: Lumen Dusk */
+
+* {
+  font-family: "Inter", sans-serif;
+  font-size: 10pt;
+  -gtk-icon-style: symbolic;
+}
+
+window.lumen-panel {
+  background-color: #161c2e;
+  color: #e6e9f5;
+}
+
+window.lumen-panel.top    { border-bottom: 1px solid #2a3454; }
+window.lumen-panel.bottom { border-top: 1px solid #2a3454; }
+
+.lumen-panel .section { padding: 0 6px; }
+
+/* Every module is a flat "pill" */
+.lumen-panel .module,
+.lumen-panel button.module {
+  background: transparent;
+  background-image: none;
+  color: #e6e9f5;
+  border: none;
+  box-shadow: none;
+  border-radius: 10px;
+  padding: 2px 10px;
+  margin: 4px 2px;
+  min-height: 0;
+}
+
+.lumen-panel button.module:hover   { background-color: #1f2740; }
+.lumen-panel button.module:active  { background-color: #2a3454; }
+
+.lumen-panel .module label { color: #e6e9f5; }
+.lumen-panel .module .dim  { color: #8e97b8; }
+
+/* Launcher button: the primary action */
+.lumen-panel button.launcher {
+  background-color: #ffb454;
+  color: #0e1220;
+  font-weight: 700;
+  padding: 2px 14px;
+}
+.lumen-panel button.launcher label { color: #0e1220; }
+.lumen-panel button.launcher:hover { background-color: #5ad1c4; }
+
+.lumen-panel .clock { font-weight: 600; }
+
+/* State colours driven by the modules */
+.lumen-panel .module.warn     label,
+.lumen-panel .module.warn     image { color: #f5c451; }
+.lumen-panel .module.critical label,
+.lumen-panel .module.critical image { color: #ff6b7a; }
+.lumen-panel .module.charging label,
+.lumen-panel .module.charging image { color: #7bd88f; }
+.lumen-panel .module.muted    label,
+.lumen-panel .module.muted    image { color: #8e97b8; }
+
+/* Popovers (calendar, power menu) */
+popover.lumen-popover,
+popover.lumen-popover > * {
+  background-color: #161c2e;
+  color: #e6e9f5;
+}
+popover.lumen-popover {
+  border: 1px solid #2a3454;
+  border-radius: 10px;
+  padding: 6px;
+}
+popover.lumen-popover button {
+  background: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  color: #e6e9f5;
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+popover.lumen-popover button:hover { background-color: #1f2740; }
+popover.lumen-popover button.destructive:hover { background-color: #ff6b7a; color: #0e1220; }
+popover.lumen-popover calendar {
+  background-color: #161c2e;
+  color: #e6e9f5;
+  border: none;
+}
+popover.lumen-popover calendar:selected {
+  background-color: #ffb454;
+  color: #0e1220;
+  border-radius: 6px;
+}
+popover.lumen-popover calendar.header,
+popover.lumen-popover calendar.button { color: #5ad1c4; }
+popover.lumen-popover .date-title { font-weight: 700; color: #ffb454; padding: 4px 8px 8px 8px; }

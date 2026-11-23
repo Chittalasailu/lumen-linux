@@ -1,0 +1,45 @@
+# GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit.
+# Lumen: labwc window-decoration theme (Openbox-3 theme format)
+
+border.width: 2
+padding.width: 6
+padding.height: 5
+window.titlebar.padding.width: 8
+window.titlebar.padding.height: 4
+window.handle.width: 0
+
+window.active.border.color: #ffb454
+window.inactive.border.color: #2a3454
+
+window.active.title.bg.color: #161c2e
+window.inactive.title.bg.color: #0e1220
+
+window.active.label.text.color: #e6e9f5
+window.inactive.label.text.color: #8e97b8
+window.label.text.justify: left
+
+window.active.button.unpressed.image.color: #e6e9f5
+window.inactive.button.unpressed.image.color: #8e97b8
+window.active.button.hover.image.color: #ffb454
+window.inactive.button.hover.image.color: #ffb454
+
+# Client-menu / root-menu
+menu.overlap.x: 0
+menu.overlap.y: 0
+menu.width.min: 140
+menu.width.max: 320
+menu.items.padding.x: 12
+menu.items.padding.y: 7
+menu.items.bg.color: #161c2e
+menu.items.text.color: #e6e9f5
+menu.items.active.bg.color: #1f2740
+menu.items.active.text.color: #ffb454
+menu.separator.color: #2a3454
+menu.border.width: 1
+menu.border.color: #2a3454
+
+# Alt-Tab switcher and on-screen displays
+osd.bg.color: #161c2e
+osd.border.color: #ffb454
+osd.border.width: 2
+osd.label.text.color: #e6e9f5

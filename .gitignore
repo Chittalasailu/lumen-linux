@@ -1,0 +1,9 @@
+build/
+dist/
+*.iso
+*.qcow2
+__pycache__/
+*.pyc
+iso/config/packages.chroot/*.deb
+iso/.build/
+.pydeps/

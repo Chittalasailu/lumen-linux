@@ -1,0 +1,25 @@
+/* GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit. */
+/* Lumen GTK3 theme: Adwaita's dark variant with the Lumen palette on top. */
+@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+
+@define-color theme_bg_color #161c2e;
+@define-color theme_base_color #0e1220;
+@define-color theme_fg_color #e6e9f5;
+@define-color theme_text_color #e6e9f5;
+@define-color theme_selected_bg_color #ffb454;
+@define-color theme_selected_fg_color #0e1220;
+@define-color theme_unfocused_bg_color #161c2e;
+@define-color theme_unfocused_base_color #0e1220;
+@define-color theme_unfocused_fg_color #8e97b8;
+@define-color theme_unfocused_selected_bg_color #1f2740;
+@define-color insensitive_fg_color #8e97b8;
+@define-color borders #2a3454;
+@define-color unfocused_borders #2a3454;
+@define-color warning_color #f5c451;
+@define-color error_color #ff6b7a;
+@define-color success_color #7bd88f;
+
+headerbar, .titlebar { background-image: none; background-color: #161c2e; }
+selection, *:selected { background-color: #ffb454; color: #0e1220; }
+button.suggested-action { background-image: none; background-color: #ffb454; color: #0e1220; }
+*:focus { outline-color: #5ad1c4; }
