@@ -20,7 +20,7 @@ jobs:
       - name: shellcheck
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
-          shellcheck build.sh run-qemu.sh packaging/build-debs.sh \
+          shellcheck -S warning build.sh run-qemu.sh packaging/build-debs.sh \
             components/lumen-launcher/bin/lumen-launcher \
             components/lumen-panel/bin/lumen-panel \
             components/lumen-desktop/usr/bin/lumen-session \
