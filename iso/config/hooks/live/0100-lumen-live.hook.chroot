@@ -12,7 +12,7 @@ rsvg-convert -w 1920 -h 1080 \
 sed -i \
     -e 's/^NAME=.*/NAME="Lumen Linux"/' \
     -e 's/^PRETTY_NAME=.*/PRETTY_NAME="Lumen Linux 1.0 (based on Debian GNU\/Linux 13)"/' \
-    -e 's|^HOME_URL=.*|HOME_URL="https://github.com/lumen-linux/lumen-linux"|' \
+    -e 's|^HOME_URL=.*|HOME_URL="https://github.com/Chittalasailu/lumen-linux"|' \
     /usr/lib/os-release
 printf 'Lumen Linux 1.0 \\n \\l\n\n' > /etc/issue
 echo "Lumen Linux 1.0" > /etc/issue.net
