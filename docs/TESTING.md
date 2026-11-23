@@ -12,6 +12,9 @@ make test
 
 ## Image verification checklist
 
+Boot takes a few minutes in software emulation: the display stays on the boot-menu image,
+then goes black, then the desktop appears. Wait for it before assuming a hang.
+
 Run after `make iso`, booting with `./run-qemu.sh` (or `run-qemu.ps1`). Record the result of each
 line when you demo it.
 

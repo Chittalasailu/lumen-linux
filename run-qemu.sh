@@ -27,10 +27,10 @@ if [ -w /dev/kvm ]; then
 fi
 
 if [ "${GL:-0}" = 1 ]; then
-    set -- "$@" -device virtio-vga-gl,xres=1280,yres=720 -display gtk,gl=on
+    set -- "$@" -device virtio-vga-gl -display gtk,gl=on
 else
     # Software path: the session falls back to wlroots' pixman renderer.
-    set -- "$@" -device virtio-vga,xres=1280,yres=720 -display gtk
+    set -- "$@" -device virtio-vga -display gtk
 fi
 
 if [ "${UEFI:-0}" = 1 ]; then

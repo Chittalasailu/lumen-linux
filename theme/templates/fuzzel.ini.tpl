@@ -3,7 +3,9 @@
 # shared palette. Colours are RRGGBBAA, no '#'.
 font={{ fonts.ui_family }}:size={{ fonts.ui_size }}
 prompt="  "
-icon-theme=Papirus-Dark
+# Adwaita, not Papirus: with Papirus-Dark fuzzel drew Firefox's icon at its native
+# size, covering the whole screen. Missing icons fall back to hicolor.
+icon-theme=Adwaita
 icons-enabled=yes
 terminal=foot -e
 layer=overlay

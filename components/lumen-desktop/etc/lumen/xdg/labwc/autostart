@@ -7,6 +7,14 @@
 dbus-update-activation-environment --systemd \
     WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE XDG_SESSION_DESKTOP &
 
+# Virtual GPUs (QEMU/KVM) start at 640x480. Ask for a usable mode there; real
+# hardware keeps its native mode. Unsupported modes are ignored.
+if systemd-detect-virt -q 2>/dev/null; then
+    for out in $(wlr-randr | awk '/^[^ ]/ {print $1}'); do
+        wlr-randr --output "$out" --mode 1360x768 >/dev/null 2>&1 || true
+    done &
+fi
+
 # wallpaper: wl_surface on the background layer (zwlr_layer_shell_v1)
 swaybg -m fill -i /usr/share/backgrounds/lumen/lumen-dusk.png >/dev/null 2>&1 &
 
