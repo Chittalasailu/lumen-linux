@@ -34,6 +34,10 @@ After=live-config.service
 Wants=live-config.service
 EOF
 
+# live-config sets up a console autologin on tty1. greetd also uses VT1, and when
+# both claim it the session is not the seat's active one, so the compositor finds
+# no input devices and dies. Mask the getty so greetd owns VT1.
+systemctl mask getty@tty1.service
 systemctl enable greetd.service
 systemctl set-default graphical.target
 # Only one display manager may own display-manager.service.

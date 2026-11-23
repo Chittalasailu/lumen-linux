@@ -39,5 +39,5 @@ lb config noauto \
     --iso-application "Lumen Linux" \
     --iso-publisher "Lumen Linux Project" \
     --iso-volume "LUMEN_1_0" \
-    --bootappend-live "boot=live components quiet username=lumen hostname=lumen locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC" \
+    --bootappend-live "boot=live components quiet live-config.noautologin username=lumen hostname=lumen locales=en_US.UTF-8 keyboard-layouts=us timezone=UTC" \
     "$@"

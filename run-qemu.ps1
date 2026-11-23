@@ -24,7 +24,7 @@ if (-not (Get-Command qemu-system-x86_64 -ErrorAction SilentlyContinue)) {
     -accel $Accel `
     -m $MemMiB -smp $Cpus `
     -cdrom $Iso -boot d `
-    -device virtio-vga -display gtk `
+    -device virtio-vga,xres=1280,yres=720 -display gtk `
     -device intel-hda -device hda-duplex `
     -nic user,model=virtio-net-pci `
     -device qemu-xhci -device usb-tablet
