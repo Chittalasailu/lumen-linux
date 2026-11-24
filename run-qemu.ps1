@@ -16,7 +16,8 @@ param(
     [int]$MemMiB = 4096,
     [int]$Cpus = 4,
     [ValidateSet("whpx", "tcg")][string]$Accel = "whpx",
-    [switch]$Uefi
+    [switch]$Uefi,
+    [string[]]$ExtraArgs = @()   # appended to the QEMU command line, e.g. -ExtraArgs "-serial","stdio"
 )
 
 if (-not (Test-Path $Iso)) { throw "ISO not found: $Iso" }
@@ -47,4 +48,5 @@ if ($Uefi) {
     -device virtio-vga -display gtk `
     -device intel-hda -device hda-duplex `
     -nic user,model=virtio-net-pci `
-    -device qemu-xhci -device usb-tablet
+    -device qemu-xhci -device usb-tablet `
+    @ExtraArgs
