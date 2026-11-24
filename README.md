@@ -20,27 +20,36 @@ consistent identity: **Lumen Dusk**, deep navy surfaces with an amber accent.
 
 ## Status
 
-The ISO was built by CI, downloaded, checksum-verified and booted in QEMU (BIOS and UEFI, Windows
-host with WHPX). Boot-testing found and fixed several bugs, listed in the git history: the live
-user was never created, a console login competed with greetd for the first VT, the launcher drew
-one icon at full-screen size, and the panel's popovers opened off-screen. What has and has not
-been verified:
+Every push builds the ISO in CI and then **boots it headless in QEMU under both BIOS and UEFI**
+([tests/boot_test.py](tests/boot_test.py)). The test waits for automatic login, then drives the
+desktop through QEMU's control socket, saves a screenshot at each step and fails if a check
+fails. The latest run passed all 8 checks on both firmware types:
 
-| Verified in QEMU | Not yet verified |
-|---|---|
-| Boots under BIOS (syslinux) and UEFI (GRUB); greetd logs `lumen` in automatically; labwc starts | GPU-accelerated rendering (`GL=1`); only the software path was run |
-| Panel shows launcher button, clock, CPU, memory, network, volume, power | Real hardware, Wi-Fi, audio output |
-| Mouse: clock opens a calendar, power icon opens the session menu, scroll on volume lowers it (40% to 25%), click toggles mute | The popover fix (below the panel instead of above) was verified by patching a running guest, not in a rebuilt ISO |
-| Launcher opens under the panel (`Super+Space`), filters, themed | The launcher icon theme and 1360x768 VM mode fixes, likewise tested live only |
-| Terminal, notification (mako) and a maximised window stopping below the panel | Panel hot-reload with the panel at the bottom, popover direction there |
-| Panel moves to the bottom when `~/.config/lumen/panel.toml` is written (live reload) | |
+| Check | BIOS | UEFI |
+|---|---|---|
+| Desktop reached after automatic login (no manual steps) | 40 s | 115 s |
+| Screen is 1360x768 (virtual-GPU mode set by the session) | pass | pass |
+| Clock click opens the calendar below the panel | pass | pass |
+| Power icon opens the session menu below the panel | pass | pass |
+| `Super+Space` opens the launcher | pass | pass |
+| Launcher draws no oversized icon (a bug found earlier) | pass | pass |
+| Terminal opens and a notification appears | pass | pass |
+| Scrolling over the volume module changes it | pass | pass |
 
-In software emulation the first boot to the desktop takes about 2 to 3 minutes: the screen stays
-on the boot-menu image, goes black, then the desktop appears. Screenshots:
-[desktop](docs/screenshots/desktop.png), [launcher](docs/screenshots/launcher.png),
+Boot-testing found and fixed several bugs, all visible in the git history: the live user was never
+created, a console login competed with greetd for the first VT, the launcher drew one icon at
+full-screen size, and the panel's popovers opened off-screen. Screenshots below were captured
+from the built ISO by that test: [desktop](docs/screenshots/desktop.png),
 [calendar](docs/screenshots/panel-calendar.png), [session menu](docs/screenshots/panel-power-menu.png),
-[panel at the bottom](docs/screenshots/panel-bottom.png).
-Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks.
+[launcher](docs/screenshots/launcher.png),
+[terminal with notification](docs/screenshots/terminal-notification.png).
+
+Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi and audio output, and
+the panel when configured at the bottom edge (the popover direction there follows the same code
+but was only exercised on a top panel). Hardware GL and the CI run use software or virtual
+devices only. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
+appear; with KVM it takes under two minutes.
+Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks by hand.
 
 ## Build the ISO
 
@@ -153,6 +162,7 @@ components/
 packaging/              dpkg-deb build of the three Lumen packages
 iso/                    live-build tree: package list, hooks, auto/config
 build.sh, Dockerfile.build, Makefile   build entry points
+tests/boot_test.py                     boots the built ISO in QEMU and checks the desktop
 run-qemu.sh, run-qemu.ps1              test the ISO
 .github/workflows/      CI: tests, shellcheck, ISO build
 ```

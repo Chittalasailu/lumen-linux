@@ -1,5 +1,19 @@
 # Testing and demo
 
+## Boot test in CI (the shipped ISO, BIOS and UEFI)
+
+`tests/boot_test.py` boots the ISO in QEMU without a display and uses QEMU's QMP socket for
+screenshots, key presses and absolute mouse events. It passes only if the desktop appears after
+automatic login at 1360x768 and the calendar, session menu, launcher, notification, maximised
+window and volume scroll all behave. CI runs it for both firmware types after every build and
+uploads the screenshots as the `boot-test-bios` and `boot-test-uefi` artifacts (about 600 KB each).
+To run it yourself on Linux:
+
+```sh
+sudo apt install qemu-system-x86 ovmf python3-pil
+python3 tests/boot_test.py --iso dist/lumen-linux-1.0.0-amd64.iso --firmware uefi --out shots
+```
+
 ## Automated (no display, runs on any machine and in CI)
 
 ```sh
