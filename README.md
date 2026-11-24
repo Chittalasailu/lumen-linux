@@ -20,21 +20,26 @@ consistent identity: **Lumen Dusk**, deep navy surfaces with an amber accent.
 
 ## Status
 
-The ISO was built by CI, downloaded, checksum-verified and booted in QEMU (BIOS boot, Windows
-host with WHPX). Boot-testing found and fixed two image bugs (see the git history). What has and
-has not been verified:
+The ISO was built by CI, downloaded, checksum-verified and booted in QEMU (BIOS and UEFI, Windows
+host with WHPX). Boot-testing found and fixed several bugs, listed in the git history: the live
+user was never created, a console login competed with greetd for the first VT, the launcher drew
+one icon at full-screen size, and the panel's popovers opened off-screen. What has and has not
+been verified:
 
 | Verified in QEMU | Not yet verified |
 |---|---|
-| Boots; greetd logs `lumen` in automatically; labwc Wayland session starts | UEFI boot (`UEFI=1`) |
-| Panel appears with launcher button, clock, CPU, memory, network, volume, power | Mouse-driven panel features: calendar popover, power menu, volume scroll/click (keyboard-only testing so far) |
-| Launcher opens under the panel (`Super+Space`), filters, themed | GPU-accelerated rendering (`GL=1`); only the software path was run |
-| Terminal, notification (mako) and maximised window stop below the panel | Real hardware, Wi-Fi, audio output |
-| Panel moves to the bottom when `~/.config/lumen/panel.toml` is written (live reload) | The last two fixes (launcher icon theme, 1360x768 mode in VMs) were tested live but not in a rebuilt ISO |
+| Boots under BIOS (syslinux) and UEFI (GRUB); greetd logs `lumen` in automatically; labwc starts | GPU-accelerated rendering (`GL=1`); only the software path was run |
+| Panel shows launcher button, clock, CPU, memory, network, volume, power | Real hardware, Wi-Fi, audio output |
+| Mouse: clock opens a calendar, power icon opens the session menu, scroll on volume lowers it (40% to 25%), click toggles mute | The popover fix (below the panel instead of above) was verified by patching a running guest, not in a rebuilt ISO |
+| Launcher opens under the panel (`Super+Space`), filters, themed | The launcher icon theme and 1360x768 VM mode fixes, likewise tested live only |
+| Terminal, notification (mako) and a maximised window stopping below the panel | Panel hot-reload with the panel at the bottom, popover direction there |
+| Panel moves to the bottom when `~/.config/lumen/panel.toml` is written (live reload) | |
 
-In QEMU without KVM the first boot to desktop took about 3 minutes; with `-accel kvm`/WHPX it
-is faster once the host is idle. Screenshots: [desktop](docs/screenshots/desktop.png),
-[launcher](docs/screenshots/launcher.png), [panel at the bottom](docs/screenshots/panel-bottom.png).
+In software emulation the first boot to the desktop takes about 2 to 3 minutes: the screen stays
+on the boot-menu image, goes black, then the desktop appears. Screenshots:
+[desktop](docs/screenshots/desktop.png), [launcher](docs/screenshots/launcher.png),
+[calendar](docs/screenshots/panel-calendar.png), [session menu](docs/screenshots/panel-power-menu.png),
+[panel at the bottom](docs/screenshots/panel-bottom.png).
 Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks.
 
 ## Build the ISO
