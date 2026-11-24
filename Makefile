@@ -26,7 +26,7 @@ check: test
 test:
 	python3 tools/gen-theme.py --check
 	cd components/lumen-panel && python3 -m unittest discover -s tests -v
-	for f in build.sh run-qemu.sh packaging/build-debs.sh components/*/bin/* components/lumen-desktop/usr/bin/* iso/auto/*; do sh -n $$f || exit 1; done
+	for f in build.sh run-qemu.sh packaging/build-debs.sh components/*/bin/* components/lumen-desktop/usr/bin/* iso/auto/* iso/config/hooks/live/*; do sh -n $$f || exit 1; done
 	python3 -c "import xml.dom.minidom as m; [m.parse(f) for f in ['components/lumen-desktop/etc/lumen/xdg/labwc/rc.xml','components/lumen-desktop/etc/lumen/xdg/labwc/menu.xml']]"
 
 docker-image:

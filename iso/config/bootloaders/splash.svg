@@ -1,0 +1,28 @@
+<!-- GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <!-- Boot menu background. live-build renders it to 640x480 (isolinux) and
+       800x600 (GRUB) and fills in the @...@ fields. The menu itself is drawn
+       over the lower half, so the artwork stays in the top third and the
+       bottom strip. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#0e1220"/>
+      <stop offset="0.7" stop-color="#0e1220"/>
+      <stop offset="1"   stop-color="#161c2e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#ffb454" stop-opacity="0.55"/>
+      <stop offset="1"   stop-color="#ffb454" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#sky)"/>
+  <circle cx="92" cy="92" r="58" fill="url(#glow)"/>
+  <circle cx="92" cy="92" r="22" fill="#ffb454"/>
+  <text x="136" y="92" font-family="Inter, DejaVu Sans, sans-serif" font-size="34"
+        font-weight="700" fill="#e6e9f5">Lumen Linux</text>
+  <text x="138" y="116" font-family="Inter, DejaVu Sans, sans-serif" font-size="13"
+        fill="#8e97b8">Based on Debian @VERSION@ (@DISTRIBUTION@) · @ARCHITECTURE@ · Linux @LINUX_VERSIONS@</text>
+  <rect x="138" y="128" width="72" height="3" rx="1.5" fill="#5ad1c4"/>
+  <path d="M0 452 C120 440 220 462 340 450 C460 438 560 458 640 446 L640 480 L0 480 Z"
+        fill="#1f2740" opacity="0.7"/>
+</svg>

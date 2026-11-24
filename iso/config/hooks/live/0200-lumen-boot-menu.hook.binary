@@ -1,0 +1,8 @@
+#!/bin/sh
+# Name the GRUB (UEFI) boot entries after the distribution. live-build writes
+# "Live system" into grub.cfg itself (binary_grub_cfg), with no template to
+# override; this binary hook runs after that, inside binary/. The isolinux
+# (BIOS) labels come from config/bootloaders/syslinux_common/live.cfg.in.
+set -e
+[ -f boot/grub/grub.cfg ] && sed -i 's/Live system/Lumen Linux live/g' boot/grub/grub.cfg
+exit 0
