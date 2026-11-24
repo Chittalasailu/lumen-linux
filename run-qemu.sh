@@ -21,22 +21,33 @@ set -- -m "$MEM" -smp "$SMP" -cdrom "$ISO" -boot d \
     -nic user,model=virtio-net-pci \
     -device qemu-xhci -device usb-tablet
 
+host=$(uname -s)
 # Hardware virtualisation when the host offers it; TCG (slow) otherwise.
+# Apple Silicon cannot accelerate an x86 guest, so it stays on TCG.
 if [ -w /dev/kvm ]; then
     set -- -enable-kvm -cpu host "$@"
+elif [ "$host" = Darwin ] && [ "$(uname -m)" = x86_64 ]; then
+    set -- -accel hvf -cpu host "$@"
+else
+    set -- -accel tcg -cpu max "$@"
 fi
 
+# QEMU on macOS has the cocoa display, not gtk.
+display=gtk
+[ "$host" = Darwin ] && display=cocoa
+
 if [ "${GL:-0}" = 1 ]; then
+    [ "$host" = Darwin ] && { echo "GL=1 needs virgl, which QEMU on macOS does not provide" >&2; exit 1; }
     set -- "$@" -device virtio-vga-gl -display gtk,gl=on
 else
     # Software path: the session falls back to wlroots' pixman renderer.
-    set -- "$@" -device virtio-vga -display gtk
+    set -- "$@" -device virtio-vga -display "$display"
 fi
 
 if [ "${UEFI:-0}" = 1 ]; then
     # UEFI firmware is a flash pair: read-only code plus a writable variable store.
     code=""; vars=""
-    for d in /usr/share/OVMF /usr/share/edk2/ovmf /usr/share/qemu; do
+    for d in /usr/share/OVMF /usr/share/edk2/ovmf /usr/share/qemu /opt/homebrew/share/qemu /usr/local/share/qemu; do
         for pair in "OVMF_CODE_4M.fd OVMF_VARS_4M.fd" "OVMF_CODE.fd OVMF_VARS.fd" "edk2-x86_64-code.fd edk2-i386-vars.fd"; do
             c=${pair% *}; v=${pair#* }  # plain variables: "$@" holds the QEMU arguments
             if [ -f "$d/$c" ] && [ -f "$d/$v" ]; then code=$d/$c; vars=$d/$v; break 2; fi

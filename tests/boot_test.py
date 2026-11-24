@@ -17,12 +17,14 @@ import os
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 
 from PIL import Image, ImageChops
 
 AMBER = (255, 180, 84)  # the Lumen palette accent: colour of the panel's launcher button
-OVMF_DIRS = ("/usr/share/OVMF", "/usr/share/edk2/ovmf", "/usr/share/qemu")
+OVMF_DIRS = ("/usr/share/OVMF", "/usr/share/edk2/ovmf", "/usr/share/qemu",
+             "/opt/homebrew/share/qemu", "/usr/local/share/qemu")
 OVMF_PAIRS = (
     ("OVMF_CODE_4M.fd", "OVMF_VARS_4M.fd"),
     ("OVMF_CODE.fd", "OVMF_VARS.fd"),
@@ -140,7 +142,7 @@ def find_ovmf() -> tuple[str, str]:
         for code, vars_ in OVMF_PAIRS:
             if os.path.exists(f"{d}/{code}") and os.path.exists(f"{d}/{vars_}"):
                 return f"{d}/{code}", f"{d}/{vars_}"
-    raise SystemExit("OVMF/edk2 firmware not found (apt install ovmf)")
+    raise SystemExit("OVMF/edk2 firmware not found (apt install ovmf / brew install qemu)")
 
 
 def main() -> int:
@@ -154,9 +156,9 @@ def main() -> int:
 
     os.makedirs(args.out, exist_ok=True)
     out = args.out
-    sock = os.path.join(out, "qmp.sock")
-    if os.path.exists(sock):
-        os.unlink(sock)
+    # Unix socket paths are capped at ~104 bytes (macOS) / 108 (Linux): keep it short
+    # rather than inside --out, which may be deep.
+    sock = os.path.join(tempfile.mkdtemp(prefix="lumen-qmp-"), "qmp.sock")
 
     cmd = ["qemu-system-x86_64", "-m", args.mem, "-smp", "2",
            "-cdrom", args.iso, "-boot", "d",
@@ -168,6 +170,9 @@ def main() -> int:
     if os.access("/dev/kvm", os.R_OK | os.W_OK):
         cmd += ["-enable-kvm", "-cpu", "host"]
         log("using KVM acceleration")
+    elif sys.platform == "darwin" and os.uname().machine == "x86_64":
+        cmd += ["-accel", "hvf", "-cpu", "host"]
+        log("using HVF acceleration")
     else:
         cmd += ["-accel", "tcg", "-cpu", "max"]
         log("no /dev/kvm: using software emulation (slow)")
@@ -222,7 +227,6 @@ def main() -> int:
         check("auto-login to Wayland session at 1360x768", size == (1360, 768), f"screen is {size[0]}x{size[1]}")
 
         w, h = size
-        panel_box = (0, 0, w, 40)
         below = (0, 41, w, 400)
 
         # calendar popover: click the clock (centre of the panel)
