@@ -87,7 +87,7 @@ Windows (PowerShell, QEMU on `PATH`):
 ```powershell
 .\run-qemu.ps1 -Iso .\dist\lumen-linux-1.0.0-amd64.iso            # WHPX acceleration
 .\run-qemu.ps1 -Iso .\dist\lumen-linux-1.0.0-amd64.iso -Accel tcg  # if WHPX is unavailable
-.un-qemu.ps1 -Iso .\dist\lumen-linux-1.0.0-amd64.iso -Uefi        # UEFI (GRUB) instead of BIOS
+.\run-qemu.ps1 -Iso .\dist\lumen-linux-1.0.0-amd64.iso -Uefi        # UEFI (GRUB) instead of BIOS
 ```
 
 Or the raw command:
