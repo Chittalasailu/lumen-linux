@@ -62,11 +62,22 @@ their own directory removes the conflict, keeps our configuration in one place, 
 user override precedence. The greetd case uses a service drop-in that passes `--config` to a
 file we own.
 
-## greetd + autologin only in the live image
+## greetd + gtkgreet in cage; autologin only in the live image
 
-greetd needs no display server or toolkit, runs sessions through PAM/logind, and is enough for
-a text greeter on installed systems. Autologin is appended by the image hook, not shipped in the
-package, so installing `lumen-desktop` on a real machine never silently logs a user in.
+greetd needs no display server, runs sessions through PAM/logind and talks to any greeter. The
+greeter is gtkgreet inside cage: both are in Debian, gtkgreet is GTK so it picks up the Lumen
+theme with no extra work, and cage is a minimal wlroots kiosk compositor, so the login screen
+is Wayland end to end. A text greeter (`agreety`) was used first; it left *Log out* on a bare
+console, which broke the visual identity. Autologin is appended by the image hook, not shipped in
+the package, so installing `lumen-desktop` on a real machine never silently logs a user in.
+
+## GTK theme by recolouring Adwaita
+
+Writing a GTK3 theme from scratch is thousands of lines; overriding Adwaita's named colours
+does not work because its compiled CSS uses literal values. Recolouring a pinned copy of
+Adwaita dark with a palette-driven mapping (see ARCHITECTURE, section 4) gives complete, correct
+widget styling in Lumen colours. *Trade-off:* the vendored stylesheet is tied to GTK 3.24.x; a
+new GTK release means re-extracting it with `gresource extract`.
 
 ## Software rendering fallback
 
@@ -76,12 +87,15 @@ compositing in a plain VM, acceptable for a demonstration.
 
 ## Reproducibility scope
 
-What is controlled: the build container (pinned `debian:trixie`), optional snapshot.debian.org
-pinning of every package, `SOURCE_DATE_EPOCH` for our packages, deterministic theme generation
+What is controlled: the build container (pinned `debian:trixie`, always amd64), optional
+snapshot.debian.org pinning of every package, `SOURCE_DATE_EPOCH` for our packages (the last
+commit time; the build reads it with `safe.directory` because it runs as root on a checkout
+owned by another user, which git otherwise refuses), deterministic theme generation
 and a CI freshness check. What is not: live-build embeds timestamps and some ordering, so the
 ISO is repeatable in *inputs*, not bit-identical. The README states this plainly.
 
 ## Left out on purpose
 
 Task list / system tray in the panel (need protocol bindings outside GTK), an installer
-(`--debian-installer none`; the ISO is a live system), custom boot splash, Secure Boot signing.
+(`--debian-installer none`; the ISO is a live system), boot-time splash (Plymouth), Secure Boot
+signing.

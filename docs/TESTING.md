@@ -34,7 +34,12 @@ line when you demo it.
 
 **Boot**
 - [ ] ISO boots under BIOS (default) and UEFI (`UEFI=1`)
+- [ ] Both boot menus show the Lumen splash, amber selection and "Lumen Linux live" entries
 - [ ] Automatic login reaches the desktop with no prompts
+
+**Theme**
+- [ ] `gsettings get org.gnome.desktop.interface gtk-theme` prints `'Lumen'`
+- [ ] Thunar (`Super+E`): navy surfaces, amber selected row with dark text, no Adwaita blue
 
 **Compositor and session**
 - [ ] `echo $XDG_SESSION_TYPE` prints `wayland`; `echo $XDG_CURRENT_DESKTOP` prints `labwc:wlroots`
@@ -49,7 +54,8 @@ line when you demo it.
 - [ ] CPU and memory values change when a load is started (`yes > /dev/null`)
 - [ ] Network shows `Wired` in QEMU user networking
 - [ ] Volume responds to scroll/click (needs the `hda-duplex` device)
-- [ ] Power popover opens; *Lock screen* locks; *Log out* ends the session
+- [ ] Power popover opens; *Lock screen* locks; *Log out* ends the session and shows the Lumen
+      login screen (gtkgreet); `lumen` / `live` logs back in
 - [ ] Edit `~/.config/lumen/panel.toml` (for example `position = "bottom"`): the panel moves
       without a restart
 - [ ] `~/.local/state/lumen/panel.log` has no tracebacks

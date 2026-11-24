@@ -22,8 +22,10 @@
 | [labwc](https://github.com/labwc/labwc) (GPL-2.0), the compositor | `rc.xml` keybindings and behaviour, `Lumen` window theme, root menu, environment, autostart |
 | [foot](https://codeberg.org/dnkl/foot) (MIT), terminal | generated colour scheme and font |
 | [mako](https://github.com/emersion/mako) (MIT), notifications | generated theme |
-| GTK 3 (LGPL-2.1+) | `Lumen` theme layered on Adwaita dark, settings |
+| GTK 3 (LGPL-2.1+) | `Lumen` theme: Adwaita dark (`theme/vendor/adwaita/`, extracted unmodified from Debian's libgtk 3.24.49) recoloured by `tools/gen-theme.py`; GSettings defaults |
 | greetd (GPL-3.0) | login configuration, live-image autologin |
+| [gtkgreet](https://git.sr.ht/~kennylevinsen/gtkgreet) (GPL-3.0) and [cage](https://github.com/cage-kiosk/cage) (MIT) | the login screen: palette-generated stylesheet, launched by the greetd configuration |
+| live-build (GPL-3.0+) boot menu | palette-generated splash, isolinux colours, GRUB theme, entry names |
 
 ## Reused without modification
 

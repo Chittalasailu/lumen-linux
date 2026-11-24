@@ -44,16 +44,21 @@ from the built ISO by that test: [desktop](docs/screenshots/desktop.png),
 [launcher](docs/screenshots/launcher.png),
 [terminal with notification](docs/screenshots/terminal-notification.png).
 
-Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi and audio output, and
-the panel when configured at the bottom edge (the popover direction there follows the same code
-but was only exercised on a top panel). Everything above ran on virtual devices. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
+Also checked by hand on the built ISO: moving the panel to the bottom edge through
+`~/.config/lumen/panel.toml` (live reload, popovers open upwards), lock and unlock, the run
+launcher (`Alt+F2`), the file manager in the Lumen GTK theme, and logging out to the graphical
+login screen. Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi and
+audio output. Everything above ran on virtual devices. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
 appear; with KVM it takes under two minutes.
 Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks by hand.
 
 ## Build the ISO
 
-The build runs inside a Debian 13 container, so the host can be any Linux, macOS or Windows
-machine with Docker. It needs about 10 GB of free disk and 20-40 minutes.
+The build runs inside a Debian 13 (amd64) container, so the host can be any Linux, macOS or
+Windows machine with Docker. It needs about 10 GB of free disk and 20-40 minutes on an x86 host;
+on Apple Silicon Docker emulates amd64 and the build takes roughly 30-60 minutes. The live-build
+work directory is kept in a Docker volume (`lumen-build`) because the chroot needs a Linux
+filesystem, which a macOS or Windows bind mount is not; `make clean` removes it.
 
 ```sh
 git clone <this repository> lumen-linux && cd lumen-linux
@@ -78,7 +83,7 @@ sudo ./build.sh
 | Setting | Effect |
 |---|---|
 | `LUMEN_SNAPSHOT=20261101T000000Z make iso` | Pins every Debian package to that [snapshot.debian.org](https://snapshot.debian.org) archive, so the package set is identical on every build |
-| `SOURCE_DATE_EPOCH` | Clamps timestamps inside the Lumen `.deb` files (defaults to the last commit time) |
+| `SOURCE_DATE_EPOCH` | Clamps timestamps inside the Lumen `.deb` files (defaults to the last commit time, passed in by `make iso`) |
 | `LUMEN_MIRROR=...` | Use a local mirror |
 
 The build tools run in a pinned `debian:trixie` image, the theme is generated deterministically
@@ -87,13 +92,17 @@ is *reproducible in inputs*, not bit-for-bit: live-build embeds some timestamps 
 
 ## Run in QEMU
 
-Linux / macOS:
+Linux / macOS (`brew install qemu` on a Mac):
 
 ```sh
 ./run-qemu.sh dist/lumen-linux-1.0.0-amd64.iso          # BIOS boot, software rendering
-UEFI=1 ./run-qemu.sh dist/lumen-linux-1.0.0-amd64.iso    # UEFI via OVMF
-GL=1   ./run-qemu.sh dist/lumen-linux-1.0.0-amd64.iso    # virgl 3D acceleration
+UEFI=1 ./run-qemu.sh dist/lumen-linux-1.0.0-amd64.iso    # UEFI via OVMF / edk2
+GL=1   ./run-qemu.sh dist/lumen-linux-1.0.0-amd64.iso    # virgl 3D acceleration (Linux only)
 ```
+
+The script picks KVM on Linux, HVF on Intel Macs and software emulation elsewhere (Apple
+Silicon cannot accelerate an x86 guest: expect about 90 seconds to the desktop), and the gtk
+display on Linux or cocoa on macOS.
 
 Windows (PowerShell, QEMU on `PATH`):
 
@@ -112,7 +121,8 @@ qemu-system-x86_64 -enable-kvm -m 4096 -smp 4 -cdrom dist/lumen-linux-1.0.0-amd6
 ```
 
 The live system logs in automatically as **`lumen`** (password **`live`**, passwordless `sudo`).
-The boot menu defaults to the live system; the desktop appears after the automatic login.
+The boot menu defaults to the live system; the desktop appears after the automatic login. After
+*Log out* the Lumen login screen appears; sign in again as `lumen` / `live`.
 
 ## Using the desktop
 
@@ -152,14 +162,15 @@ On a running system:
 ## Repository layout
 
 ```
-theme/                  palette.toml + templates (single source of truth for the look)
-tools/gen-theme.py      renders templates into the component trees
+theme/                  palette.toml + templates (single source of truth for the look),
+                        vendor/adwaita (the GTK stylesheet that gets recoloured)
+tools/gen-theme.py      renders templates into the component and boot-menu trees
 components/
   lumen-panel/          from-scratch panel (Python package, CSS, tests)
   lumen-launcher/       fuzzel wrapper + generated launcher theme
-  lumen-desktop/        rootfs overlay: session, labwc/greetd/GTK config, theme, wallpaper
+  lumen-desktop/        rootfs overlay: session, labwc/greetd/GTK config, login screen, theme, wallpaper
 packaging/              dpkg-deb build of the three Lumen packages
-iso/                    live-build tree: package list, hooks, auto/config
+iso/                    live-build tree: package list, hooks, boot menu branding, auto/config
 build.sh, Dockerfile.build, Makefile   build entry points
 tests/boot_test.py                     boots the built ISO in QEMU and checks the desktop
 run-qemu.sh, run-qemu.ps1              test the ISO
