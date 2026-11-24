@@ -251,8 +251,8 @@ def main() -> int:
         qmp.type("fire")
         time.sleep(2)
         launcher = qmp.shot(os.path.join(out, "04-launcher.png"))
-        check("Super+Space opens the launcher", changed_pixels(desktop, launcher, below) > 5000,
-              f"{changed_pixels(desktop, launcher, below)} pixels changed")
+        check("Super+Space opens the launcher", changed_pixels(desktop, launcher, below, 6) > 20000,
+              f"{changed_pixels(desktop, launcher, below, 6)} pixels changed")
         # a fixed bug: with one Firefox result the launcher drew its icon at screen size
         big = orange_pixels(launcher, (0, h // 2, w, h))
         check("launcher draws no oversized icon", big < 1500, f"{big} orange pixels in the lower half")
@@ -263,7 +263,7 @@ def main() -> int:
         qmp.keys("meta_l", "ret")
         time.sleep(6)
         qmp.type("notify-send Hello Lumen-works\n")
-        time.sleep(4)
+        time.sleep(6)  # typing through QMP is slow; let the notification appear
         term = qmp.shot(os.path.join(out, "05-terminal-notification.png"))
         check("terminal opens and a notification appears", changed_pixels(desktop, term, below) > 5000)
         qmp.keys("meta_l", "up")
