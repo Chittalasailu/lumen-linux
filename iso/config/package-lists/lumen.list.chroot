@@ -40,6 +40,8 @@ xdg-user-dirs
 xdg-desktop-portal
 xdg-desktop-portal-wlr
 xdg-desktop-portal-gtk
+# gsettings CLI: inspect and change the GTK theme, icons and fonts (GSettings under Wayland)
+libglib2.0-bin
 
 # --- Graphics (software rendering works everywhere, Mesa for real/virtual GPUs) ----
 libgl1-mesa-dri

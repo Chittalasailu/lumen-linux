@@ -1,0 +1,13 @@
+# GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit.
+# Under Wayland GTK takes its theme, icons and fonts from GSettings
+# (org.gnome.desktop.interface), not from gtk-3.0/settings.ini. These are the
+# distribution defaults; libglib's dpkg trigger compiles them on install.
+[org.gnome.desktop.interface]
+gtk-theme='Lumen'
+icon-theme='Papirus-Dark'
+cursor-theme='Adwaita'
+cursor-size=24
+font-name='Inter 10'
+document-font-name='Inter 10'
+monospace-font-name='JetBrains Mono 10'
+color-scheme='prefer-dark'

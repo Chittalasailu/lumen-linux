@@ -1,24 +1,24 @@
-/* Lumen GTK3 theme: Adwaita's dark variant with the Lumen palette on top. */
-@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+/* Lumen additions on top of the recoloured Adwaita dark above. */
 
-@define-color theme_bg_color {{ colors.surface }};
-@define-color theme_base_color {{ colors.bg }};
-@define-color theme_fg_color {{ colors.text }};
-@define-color theme_text_color {{ colors.text }};
-@define-color theme_selected_bg_color {{ colors.accent }};
-@define-color theme_selected_fg_color {{ colors.bg }};
-@define-color theme_unfocused_bg_color {{ colors.surface }};
-@define-color theme_unfocused_base_color {{ colors.bg }};
-@define-color theme_unfocused_fg_color {{ colors.text_dim }};
-@define-color theme_unfocused_selected_bg_color {{ colors.surface_alt }};
-@define-color insensitive_fg_color {{ colors.text_dim }};
-@define-color borders {{ colors.border }};
-@define-color unfocused_borders {{ colors.border }};
-@define-color warning_color {{ colors.warn }};
-@define-color error_color {{ colors.danger }};
-@define-color success_color {{ colors.ok }};
+/* Links and focus rings use the secondary accent so they never read as a selection. */
+*:link, *:link:visited, button:link > label, button:visited > label,
+button:link > label:visited, button:visited > label:visited { color: {{ colors.accent_alt }}; }
+*:link:hover, button:link > label:hover, button:visited > label:hover { color: {{ colors.text }}; }
 
-headerbar, .titlebar { background-image: none; background-color: {{ colors.surface }}; }
-selection, *:selected { background-color: {{ colors.accent }}; color: {{ colors.bg }}; }
-button.suggested-action { background-image: none; background-color: {{ colors.accent }}; color: {{ colors.bg }}; }
-*:focus { outline-color: {{ colors.accent_alt }}; }
+/* Suggested and destructive buttons: flat palette colours, dark text on the bright fills. */
+button.suggested-action, button.suggested-action:hover {
+  background-image: none;
+  background-color: {{ colors.accent }};
+  border-color: {{ colors.accent }};
+  color: {{ colors.bg }};
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
+button.destructive-action, button.destructive-action:hover {
+  background-image: none;
+  background-color: {{ colors.danger }};
+  border-color: {{ colors.danger }};
+  color: {{ colors.bg }};
+  text-shadow: none;
+  -gtk-icon-shadow: none;
+}
