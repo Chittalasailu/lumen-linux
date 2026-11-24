@@ -53,3 +53,44 @@ jobs:
           files: |
             dist/*.iso
             dist/*.sha256
+
+  boot-test:
+    # Boots the ISO that was just built, headless, and checks the desktop actually works.
+    needs: iso
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        firmware: [bios, uefi]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: lumen-linux-iso
+          path: dist
+      - name: Install QEMU, UEFI firmware and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-system-x86 ovmf python3-pil
+      - name: Allow KVM for the runner user (if the runner has it)
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+          ls -l /dev/kvm || echo "no /dev/kvm: the test will fall back to software emulation"
+      - name: Boot the ISO and exercise the desktop
+        run: python3 tests/boot_test.py --iso dist/*.iso --firmware ${{ matrix.firmware }} --out shots-${{ matrix.firmware }}
+      - name: Summarise
+        if: always()
+        run: |
+          echo "### Boot test (${{ matrix.firmware }})" >> "$GITHUB_STEP_SUMMARY"
+          cat shots-${{ matrix.firmware }}/results.json >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: boot-test-${{ matrix.firmware }}
+          path: |
+            shots-${{ matrix.firmware }}/*.png
+            shots-${{ matrix.firmware }}/results.json
+          retention-days: 14
