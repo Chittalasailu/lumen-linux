@@ -1,0 +1,39 @@
+/* GENERATED from theme/palette.toml by tools/gen-theme.py. Do not edit. */
+/* gtkgreet, the Lumen login screen. Widgets come from the Lumen GTK theme;
+ * this only lays the card over the wallpaper. Palette: Lumen Dusk */
+
+window {
+  background-color: #0e1220;
+  background-image: url("file:///usr/share/backgrounds/lumen/lumen-dusk.png");
+  background-size: cover;
+  background-position: center;
+  font-family: "Inter", sans-serif;
+}
+
+box#body {
+  background-color: alpha(#161c2e, 0.92);
+  border: 2px solid #ffb454;
+  border-radius: 10px;
+  padding: 36px 44px;
+}
+
+box#body label {
+  color: #e6e9f5;
+  font-size: 12pt;
+}
+
+box#body button.suggested-action label {
+  color: #0e1220;
+}
+
+box#body entry {
+  min-width: 260px;
+  min-height: 34px;
+  border-radius: 10px;
+}
+
+box#body button {
+  min-height: 34px;
+  border-radius: 10px;
+  padding: 0 18px;
+}

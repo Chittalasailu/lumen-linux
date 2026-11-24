@@ -97,12 +97,12 @@ finish lumen-launcher
 # --------------------------------------------------------------- lumen-desktop
 P=$STAGE/lumen-desktop
 control lumen-desktop all \
-    "lumen-panel (= $VERSION), lumen-launcher (= $VERSION), labwc, greetd, foot, mako-notifier, swaybg, lxpolkit, dbus-user-session, libpam-systemd, xwayland, grim, slurp, wl-clipboard, libnotify-bin, papirus-icon-theme, adwaita-icon-theme, fonts-inter, fonts-jetbrains-mono" \
+    "lumen-panel (= $VERSION), lumen-launcher (= $VERSION), labwc, greetd, cage, gtkgreet, foot, mako-notifier, swaybg, lxpolkit, dbus-user-session, libpam-systemd, xwayland, grim, slurp, wl-clipboard, libnotify-bin, papirus-icon-theme, adwaita-icon-theme, fonts-inter, fonts-jetbrains-mono" \
     "swaylock, brightnessctl, thunar, firefox-esr" \
     "Lumen Linux desktop session and defaults
  The labwc-based Wayland session for Lumen Linux: session script, compositor
- configuration, greetd login configuration, GTK/labwc themes, wallpaper and
- default settings."
+ configuration, greetd login screen (gtkgreet in cage), GTK/labwc themes,
+ wallpaper and default settings."
 cp -a "$ROOT/components/lumen-desktop/." "$P/"
 cp "$ROOT/packaging/scripts/lumen-desktop.postinst" "$P/DEBIAN/postinst"
 cp "$ROOT/packaging/scripts/lumen-desktop.postrm" "$P/DEBIAN/postrm"

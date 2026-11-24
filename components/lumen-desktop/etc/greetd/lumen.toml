@@ -14,6 +14,10 @@
 [terminal]
 vt = 1
 
+# The login screen: gtkgreet (a GTK greetd client) inside cage, a kiosk Wayland
+# compositor that shows one fullscreen application. It uses the Lumen GTK theme
+# (GSettings default) plus lumen-greeter.css, generated from the shared palette.
+# Software rendering is allowed so it also works without a GPU (VMs).
 [default_session]
-command = "/usr/sbin/agreety --cmd /usr/bin/lumen-session"
+command = "env WLR_RENDERER_ALLOW_SOFTWARE=1 GTK_THEME=Lumen cage -s -d -m last -- gtkgreet -c /usr/bin/lumen-session -s /etc/greetd/lumen-greeter.css"
 user = "_greetd"

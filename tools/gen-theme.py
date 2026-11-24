@@ -34,6 +34,7 @@ TARGETS = {
     "foot.ini.tpl": "components/lumen-desktop/etc/lumen/xdg/foot/foot.ini",
     "mako.conf.tpl": "components/lumen-desktop/etc/lumen/xdg/mako/config",
     "wallpaper.svg.tpl": "components/lumen-desktop/usr/share/backgrounds/lumen/lumen-dusk.svg",
+    "greeter.css.tpl": "components/lumen-desktop/etc/greetd/lumen-greeter.css",
     "gschema.override.tpl": "components/lumen-desktop/usr/share/glib-2.0/schemas/90_lumen.gschema.override",
 }
 
