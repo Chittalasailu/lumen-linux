@@ -9,4 +9,6 @@ lib=$(ldconfig -p 2>/dev/null | awk '/libgtk-layer-shell\.so\.0 /{print $NF; exi
 if [ -n "$lib" ]; then
     export LD_PRELOAD="$lib${LD_PRELOAD:+:$LD_PRELOAD}"
 fi
+# No accessibility bus runs in this session; silence the AT-SPI warning.
+export NO_AT_BRIDGE=1
 exec python3 -m lumen_panel "$@"

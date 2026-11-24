@@ -31,8 +31,7 @@ class Power(Module):
         self.button.set_tooltip_text("Session")
         self.pack_start(self.button, False, False, 0)
 
-        self.popover = Gtk.Popover.new(self.button)
-        self.popover.get_style_context().add_class("lumen-popover")
+        self.popover = self.new_popover(self.button)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         for key, text, icon, destructive in ACTIONS:
             argv = cfg.get(key)
@@ -50,7 +49,7 @@ class Power(Module):
             box.pack_start(row, False, False, 0)
         box.show_all()
         self.popover.add(box)
-        self.button.connect("clicked", lambda _b: self.popover.popup())
+        self.button.connect("clicked", lambda _b: self.open_popover(self.popover))
 
     def _run(self, _button: Gtk.Button, argv: list) -> None:
         self.popover.popdown()

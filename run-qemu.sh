@@ -34,9 +34,18 @@ else
 fi
 
 if [ "${UEFI:-0}" = 1 ]; then
-    for fw in /usr/share/OVMF/OVMF_CODE.fd /usr/share/OVMF/OVMF_CODE_4M.fd /usr/share/edk2/ovmf/OVMF_CODE.fd; do
-        [ -f "$fw" ] && { set -- -bios "$fw" "$@"; break; }
+    # UEFI firmware is a flash pair: read-only code plus a writable variable store.
+    code=""; vars=""
+    for d in /usr/share/OVMF /usr/share/edk2/ovmf /usr/share/qemu; do
+        for pair in "OVMF_CODE_4M.fd OVMF_VARS_4M.fd" "OVMF_CODE.fd OVMF_VARS.fd" "edk2-x86_64-code.fd edk2-i386-vars.fd"; do
+            c=${pair% *}; v=${pair#* }  # plain variables: "$@" holds the QEMU arguments
+            if [ -f "$d/$c" ] && [ -f "$d/$v" ]; then code=$d/$c; vars=$d/$v; break 2; fi
+        done
     done
+    [ -n "$code" ] || { echo "UEFI firmware (OVMF/edk2) not found" >&2; exit 1; }
+    vars_copy=$(mktemp)
+    cp "$vars" "$vars_copy"
+    set -- -drive "if=pflash,format=raw,unit=0,readonly=on,file=$code"            -drive "if=pflash,format=raw,unit=1,file=$vars_copy" "$@"
 fi
 
 exec qemu-system-x86_64 "$@"

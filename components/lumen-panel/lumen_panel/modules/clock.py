@@ -28,8 +28,7 @@ class Clock(Module):
         self.button.add(self.label)
         self.pack_start(self.button, False, False, 0)
 
-        self.popover = Gtk.Popover.new(self.button)
-        self.popover.get_style_context().add_class("lumen-popover")
+        self.popover = self.new_popover(self.button)
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.title = Gtk.Label(xalign=0)
         self.title.get_style_context().add_class("date-title")
@@ -48,7 +47,7 @@ class Clock(Module):
         self.calendar.select_month(now.tm_mon - 1, now.tm_year)
         self.calendar.select_day(now.tm_mday)
         self.title.set_text(time.strftime("%A, %d %B %Y", now))
-        self.popover.popup()
+        self.open_popover(self.popover)
 
     def _tick(self) -> None:
         now = time.localtime()

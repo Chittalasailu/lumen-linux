@@ -65,6 +65,26 @@ class Module(Gtk.Box):
         tick()
         self._timer = GLib.timeout_add_seconds(max(1, int(seconds)), tick)
 
+    def new_popover(self, relative_to: Gtk.Widget) -> Gtk.Popover:
+        """A themed popover that may extend outside the panel's own surface.
+
+        The panel window is only ~36 px tall. GTK3 constrains popovers to their
+        window by default, so on a layer-shell surface it flips the popover
+        *upwards*, off the screen, and shows only its last row. Lifting the
+        constraint lets the compositor place the popup freely.
+        """
+        pop = Gtk.Popover.new(relative_to)
+        pop.get_style_context().add_class("lumen-popover")
+        pop.set_constrain_to(Gtk.PopoverConstraint.NONE)
+        return pop
+
+    def open_popover(self, pop: Gtk.Popover) -> None:
+        """Pop it out away from the panel: below a top panel, above a bottom one."""
+        window = self.get_toplevel()
+        at_bottom = window.get_style_context().has_class("bottom") if window else False
+        pop.set_position(Gtk.PositionType.TOP if at_bottom else Gtk.PositionType.BOTTOM)
+        pop.popup()
+
     def set_state(self, *states: str) -> None:
         """Replace the state classes (warn/critical/charging/muted)."""
         ctx = self.get_style_context()
