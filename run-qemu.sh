@@ -45,7 +45,8 @@ if [ "${UEFI:-0}" = 1 ]; then
     [ -n "$code" ] || { echo "UEFI firmware (OVMF/edk2) not found" >&2; exit 1; }
     vars_copy=$(mktemp)
     cp "$vars" "$vars_copy"
-    set -- -drive "if=pflash,format=raw,unit=0,readonly=on,file=$code"            -drive "if=pflash,format=raw,unit=1,file=$vars_copy" "$@"
+    set -- -drive "if=pflash,format=raw,unit=0,readonly=on,file=$code" \
+           -drive "if=pflash,format=raw,unit=1,file=$vars_copy" "$@"
 fi
 
 exec qemu-system-x86_64 "$@"
