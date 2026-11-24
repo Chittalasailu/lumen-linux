@@ -29,6 +29,8 @@ class Clock(Module):
         self.pack_start(self.button, False, False, 0)
 
         self.popover = self.new_popover(self.button)
+        # The tooltip repeats the date shown in the popover and overlapped its heading.
+        self.popover.connect("notify::visible", lambda p, _s: self.button.set_has_tooltip(not p.get_visible()))
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.title = Gtk.Label(xalign=0)
         self.title.get_style_context().add_class("date-title")

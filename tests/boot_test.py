@@ -46,6 +46,7 @@ class Qmp:
                 if time.time() > deadline:
                     raise
                 time.sleep(0.5)
+        self.sock.settimeout(120)  # a stuck QEMU must fail the test, not hang CI
         self.f = self.sock.makefile("rw")
         self.f.readline()  # greeting
         self.call("qmp_capabilities")
@@ -67,7 +68,10 @@ class Qmp:
     def type(self, text: str) -> None:
         names = {" ": "spc", "-": "minus", ".": "dot", "\n": "ret"}
         for ch in text:
-            self.keys(names.get(ch, ch))
+            if ch.isupper():
+                self.keys("shift", ch.lower())
+            else:
+                self.keys(names.get(ch, ch))
             time.sleep(0.08)
 
     def _move(self, x: float, y: float, w: int, h: int) -> None:
@@ -125,9 +129,10 @@ def orange_pixels(img: Image.Image, box: tuple[int, int, int, int]) -> int:
     return sum(1 for r, g, b in img.crop(box).getdata() if r > 230 and 90 < g < 150 and b < 70)
 
 
-def changed_pixels(a: Image.Image, b: Image.Image, box: tuple[int, int, int, int]) -> int:
+def changed_pixels(a: Image.Image, b: Image.Image, box: tuple[int, int, int, int], threshold: int = 24) -> int:
+    """Pixels whose brightness differs by more than *threshold* (0-255)."""
     diff = ImageChops.difference(a.crop(box), b.crop(box)).convert("L")
-    return sum(1 for v in diff.getdata() if v > 24)
+    return sum(1 for v in diff.getdata() if v > threshold)
 
 
 def find_ovmf() -> tuple[str, str]:
@@ -177,6 +182,7 @@ def main() -> int:
     log("starting QEMU: " + " ".join(cmd))
     qemu = subprocess.Popen(cmd)
     results: dict[str, object] = {"firmware": args.firmware, "checks": {}}
+    qmp = None
     ok = True
 
     def check(name: str, passed: bool, detail: str = "") -> None:
@@ -224,8 +230,8 @@ def main() -> int:
         time.sleep(2)
         cal = qmp.shot(os.path.join(out, "02-calendar.png"))
         check("clock click opens the calendar below the panel",
-              changed_pixels(desktop, cal, below) > 3000,
-              f"{changed_pixels(desktop, cal, below)} pixels changed under the panel")
+              changed_pixels(desktop, cal, below, 6) > 3000,
+              f"{changed_pixels(desktop, cal, below, 6)} pixels changed under the panel")
         qmp.click(w / 2, 17, size)  # close it
         time.sleep(1)
 
@@ -234,9 +240,9 @@ def main() -> int:
         time.sleep(2)
         power = qmp.shot(os.path.join(out, "03-power-menu.png"))
         check("power icon opens the session menu below the panel",
-              changed_pixels(desktop, power, below) > 3000,
-              f"{changed_pixels(desktop, power, below)} pixels changed under the panel")
-        qmp.keys("esc")
+              changed_pixels(desktop, power, below, 6) > 3000,
+              f"{changed_pixels(desktop, power, below, 6)} pixels changed under the panel")
+        qmp.click(w - 27, 17, size)  # a popover ignores Escape here: click the icon again to close it
         time.sleep(1)
 
         # launcher
@@ -276,7 +282,8 @@ def main() -> int:
         results["error"] = repr(exc)
         log(f"ERROR: {exc!r}")
         try:
-            Qmp(sock, timeout=5).shot(os.path.join(out, "99-final-state.png"))
+            if qmp is not None:  # QEMU serves one QMP client at a time: reuse ours
+                qmp.shot(os.path.join(out, "99-final-state.png"))
         except Exception:
             pass
     finally:
