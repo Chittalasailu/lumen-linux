@@ -16,7 +16,7 @@ ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT=${1:-"$ROOT/iso/config/packages.chroot"}
 VERSION=${LUMEN_VERSION:-1.0.0}
 MAINTAINER="Lumen Linux Maintainers <maintainers@lumen-linux.invalid>"
-SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -C "$ROOT" log -1 --format=%ct 2>/dev/null || date +%s)}
+SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -C "$ROOT" -c safe.directory="$ROOT" log -1 --format=%ct 2>/dev/null || date +%s)}
 export SOURCE_DATE_EPOCH
 
 command -v dpkg-deb >/dev/null || { echo "dpkg-deb not found (run inside Debian/Ubuntu or the build container)" >&2; exit 1; }

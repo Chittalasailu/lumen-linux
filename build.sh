@@ -24,7 +24,9 @@ for tool in lb dpkg-deb python3; do
 done
 
 export LUMEN_VERSION=${LUMEN_VERSION:-1.0.0}
-export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git log -1 --format=%ct 2>/dev/null || date +%s)}
+# safe.directory: the build runs as root (sudo or the container) on a checkout owned by
+# another user, which git otherwise refuses with "dubious ownership".
+export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -c safe.directory="$ROOT" log -1 --format=%ct 2>/dev/null || date +%s)}
 
 WORK="$ROOT/build/live"
 DIST="$ROOT/dist"
