@@ -46,8 +46,7 @@ from the built ISO by that test: [desktop](docs/screenshots/desktop.png),
 
 Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi and audio output, and
 the panel when configured at the bottom edge (the popover direction there follows the same code
-but was only exercised on a top panel). Hardware GL and the CI run use software or virtual
-devices only. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
+but was only exercised on a top panel). Everything above ran on virtual devices. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
 appear; with KVM it takes under two minutes.
 Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks by hand.
 
