@@ -64,7 +64,7 @@ finish() { # name
 # ---------------------------------------------------------------- lumen-panel
 P=$STAGE/lumen-panel
 control lumen-panel all \
-    "python3 (>= 3.11), python3-gi, gir1.2-gtk-3.0, gir1.2-gtklayershell-0.1, libgtk-layer-shell0, adwaita-icon-theme" \
+    "python3 (>= 3.11), python3-gi, gir1.2-gtk-3.0, gir1.2-gtklayershell-0.1, libgtk-layer-shell0, python3-pywayland, python3-cffi-backend, adwaita-icon-theme" \
     "wireplumber, network-manager-gnome, pavucontrol, swaylock" \
     "Lumen Linux desktop panel
  A Wayland panel written from scratch for Lumen Linux. It uses the

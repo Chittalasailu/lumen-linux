@@ -31,6 +31,10 @@ python3-gi
 gir1.2-gtk-3.0
 gir1.2-gtklayershell-0.1
 libgtk-layer-shell0
+python3-pywayland
+# pywayland's compiled module needs the cffi runtime, which its Debian package
+# does not declare (import fails with "No module named pywayland._ffi").
+python3-cffi-backend
 
 # --- Session plumbing -----------------------------------------------------------------
 dbus-user-session
