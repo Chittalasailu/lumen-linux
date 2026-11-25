@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Boot the Lumen ISO headless in QEMU, wait for the desktop, exercise it, save screenshots.
 
-Used by CI (see .github/workflows/build-iso.yml) and runnable by hand on Linux:
+Used by CI (see .github/workflows/build-iso.yml) and runnable by hand on Linux or macOS
+(brew install qemu; pip install pillow):
 
     python3 tests/boot_test.py --iso dist/lumen-linux-1.0.0-amd64.iso --firmware bios --out shots
 
@@ -23,6 +24,7 @@ import time
 from PIL import Image, ImageChops
 
 AMBER = (255, 180, 84)  # the Lumen palette accent: colour of the panel's launcher button
+ADWAITA_BLUE = (21, 83, 158)  # stock Adwaita dark selection: must never appear in Lumen apps
 OVMF_DIRS = ("/usr/share/OVMF", "/usr/share/edk2/ovmf", "/usr/share/qemu",
              "/opt/homebrew/share/qemu", "/usr/local/share/qemu")
 OVMF_PAIRS = (
@@ -137,6 +139,36 @@ def changed_pixels(a: Image.Image, b: Image.Image, box: tuple[int, int, int, int
     return sum(1 for v in diff.getdata() if v > threshold)
 
 
+def count_colour(img: Image.Image, box: tuple[int, int, int, int], rgb: tuple[int, int, int], tol: int = 14) -> int:
+    """Pixels within *tol* of *rgb* on every channel."""
+    return sum(1 for p in img.crop(box).getdata() if all(abs(p[i] - rgb[i]) <= tol for i in range(3)))
+
+
+def panel_modules(img: Image.Image, x0: int, height: int = 36, gap: int = 16) -> list[tuple[int, int]]:
+    """Horizontal extents of the drawn modules on the panel, left to right, from x0.
+
+    A column belongs to a module when any pixel in the panel's middle band differs
+    clearly from the panel background; modules are separated by at least *gap*
+    empty columns (their padding), while text and icons inside one are closer.
+    """
+    bg = img.getpixel((x0, 2))
+    band = img.crop((x0, 6, img.width, height - 6))
+    w, h = band.size
+    px = band.load()
+    busy = [any(sum(abs(px[x, y][i] - bg[i]) for i in range(3)) > 90 for y in range(h)) for x in range(w)]
+    spans, start, empty = [], None, 0
+    for x, on in enumerate(busy + [False] * gap):
+        if on:
+            start = x if start is None else start
+            empty = 0
+        elif start is not None:
+            empty += 1
+            if empty >= gap:
+                spans.append((x0 + start, x0 + x - empty))
+                start, empty = None, 0
+    return spans
+
+
 def find_ovmf() -> tuple[str, str]:
     for d in OVMF_DIRS:
         for code, vars_ in OVMF_PAIRS:
@@ -228,59 +260,142 @@ def main() -> int:
 
         w, h = size
         below = (0, 41, w, 400)
+        menu = Image.open(os.path.join(out, "00-boot-menu.png")).convert("RGB")
+        sun = count_colour(menu, (0, 0, menu.width, menu.height // 2), AMBER, 20)
+        check("boot menu carries the Lumen branding", sun > 300, f"{sun} amber pixels in the splash")
 
-        # calendar popover: click the clock (centre of the panel)
-        qmp.click(w / 2, 17, size)
+        # The right-hand modules, located on the screenshot so the test does not
+        # depend on fonts: ... volume, clock, power (battery is absent in a VM).
+        right = panel_modules(desktop, w // 2)
+        log(f"panel modules on the right: {right}")
+        if len(right) < 3:
+            raise RuntimeError(f"expected at least 3 modules on the right of the panel, found {right}")
+        centre = lambda span: (span[0] + span[1]) / 2  # noqa: E731
+        power_x, clock_x, volume_x = centre(right[-1]), centre(right[-2]), centre(right[-3])
+
+        # calendar popover: click the clock
+        qmp.click(clock_x, 17, size)
         time.sleep(2)
         cal = qmp.shot(os.path.join(out, "02-calendar.png"))
-        check("clock click opens the calendar below the panel",
-              changed_pixels(desktop, cal, below, 6) > 3000,
-              f"{changed_pixels(desktop, cal, below, 6)} pixels changed under the panel")
-        qmp.click(w / 2, 17, size)  # close it
+        changed = changed_pixels(desktop, cal, below, 6)
+        check("clock click opens the calendar below the panel", changed > 3000, f"{changed} pixels changed under the panel")
+        qmp.click(clock_x, 17, size)  # close it
         time.sleep(1)
 
         # session menu: power icon, right end of the panel
-        qmp.click(w - 27, 17, size)
+        qmp.click(power_x, 17, size)
         time.sleep(2)
         power = qmp.shot(os.path.join(out, "03-power-menu.png"))
-        check("power icon opens the session menu below the panel",
-              changed_pixels(desktop, power, below, 6) > 3000,
-              f"{changed_pixels(desktop, power, below, 6)} pixels changed under the panel")
-        qmp.click(w - 27, 17, size)  # a popover ignores Escape here: click the icon again to close it
+        changed = changed_pixels(desktop, power, below, 6)
+        check("power icon opens the session menu below the panel", changed > 3000, f"{changed} pixels changed under the panel")
+        qmp.click(power_x, 17, size)  # a popover ignores Escape here: click the icon again to close it
         time.sleep(1)
+
+        # workspace indicator: Super+2, then back
+        ws_box = (85, 0, 260, 36)
+        qmp.keys("meta_l", "2")
+        time.sleep(2)
+        ws2 = qmp.shot(os.path.join(out, "04-workspace-2.png"))
+        changed = changed_pixels(desktop, ws2, ws_box, 30)
+        check("workspace indicator follows Super+2", changed > 60, f"{changed} pixels changed in the indicator")
+        qmp.keys("meta_l", "1")
+        time.sleep(2)
 
         # launcher
         qmp.keys("meta_l", "spc")
         time.sleep(3)
         qmp.type("fire")
         time.sleep(2)
-        launcher = qmp.shot(os.path.join(out, "04-launcher.png"))
-        check("Super+Space opens the launcher", changed_pixels(desktop, launcher, below, 6) > 20000,
-              f"{changed_pixels(desktop, launcher, below, 6)} pixels changed")
+        launcher = qmp.shot(os.path.join(out, "05-launcher.png"))
+        changed = changed_pixels(desktop, launcher, below, 6)
+        check("Super+Space opens the launcher", changed > 20000, f"{changed} pixels changed")
         # a fixed bug: with one Firefox result the launcher drew its icon at screen size
         big = orange_pixels(launcher, (0, h // 2, w, h))
         check("launcher draws no oversized icon", big < 1500, f"{big} orange pixels in the lower half")
         qmp.keys("esc")
         time.sleep(1)
 
-        # terminal + notification + maximise
+        # session menu in the launcher
+        qmp.keys("meta_l", "esc")
+        time.sleep(3)
+        session = qmp.shot(os.path.join(out, "06-session-menu.png"))
+        changed = changed_pixels(desktop, session, below, 6)
+        check("Super+Escape opens the session menu", changed > 10000, f"{changed} pixels changed")
+        qmp.keys("esc")
+        time.sleep(1)
+
+        # terminal: appears in the task list; a notification appears top right
         qmp.keys("meta_l", "ret")
         time.sleep(6)
+        term = qmp.shot(os.path.join(out, "07-terminal.png"))
+        tasks_box = (260, 0, w // 2, 36)
+        changed = changed_pixels(desktop, term, tasks_box, 30)
+        check("task list shows the new window", changed > 150, f"{changed} pixels changed in the task list")
+        note_box = (w - 400, 36, w, 160)
+        before = count_colour(term, note_box, AMBER, 20)
         qmp.type("notify-send Hello Lumen-works\n")
         time.sleep(6)  # typing through QMP is slow; let the notification appear
-        term = qmp.shot(os.path.join(out, "05-terminal-notification.png"))
-        check("terminal opens and a notification appears", changed_pixels(desktop, term, below) > 5000)
+        note = qmp.shot(os.path.join(out, "08-notification.png"))
+        border = count_colour(note, note_box, AMBER, 20) - before
+        check("notification appears top right with the amber border", border > 400, f"{border} new amber pixels")
         qmp.keys("meta_l", "up")
         time.sleep(3)
-        qmp.shot(os.path.join(out, "06-maximized.png"))
+        qmp.shot(os.path.join(out, "09-maximized.png"))
 
         # volume: scroll down over the volume module
-        qmp.scroll(w - 95, 17, size, "down", 3)
+        qmp.scroll(volume_x, 17, size, "down", 3)
         time.sleep(3)
-        vol = qmp.shot(os.path.join(out, "07-volume.png"))
-        check("volume module reacts to scrolling",
-              changed_pixels(term, vol, (w - 200, 0, w, 40)) > 20,
-              "volume label region changed")
+        vol = qmp.shot(os.path.join(out, "10-volume.png"))
+        span = right[-3]
+        changed = changed_pixels(note, vol, (span[0] - 4, 0, span[1] + 4, 36))
+        check("volume module reacts to scrolling", changed > 20, f"{changed} pixels changed in the volume module")
+
+        # window switcher (lumen-launcher --windows)
+        qmp.keys("meta_l", "tab")
+        time.sleep(4)
+        switcher = qmp.shot(os.path.join(out, "11-window-switcher.png"))
+        changed = changed_pixels(vol, switcher, (0, 41, 600, 470), 6)
+        check("Super+Tab opens the window switcher", changed > 20000, f"{changed} pixels changed")
+        # fuzzel draws a large image of the selected icon when few entries are left
+        # unless image-size-ratio=1; with one window that covered the list
+        bright = sum(1 for p in switcher.crop((40, 150, 560, 410)).getdata() if max(p) > 170)
+        check("window switcher draws no oversized icon", bright < 300, f"{bright} bright pixels below the entries")
+        qmp.keys("esc")
+        time.sleep(1)
+
+        # GTK theme: Thunar has the Lumen selection colour, never Adwaita's blue
+        qmp.keys("meta_l", "e")
+        time.sleep(15)
+        fm = qmp.shot(os.path.join(out, "12-file-manager.png"))
+        blue = count_colour(fm, (0, 41, w, h), ADWAITA_BLUE, 12)
+        amber = count_colour(fm, (0, 41, w, h), AMBER, 14)
+        check("GTK apps use the Lumen theme", blue == 0 and amber > 1000, f"{amber} amber, {blue} Adwaita-blue pixels")
+        qmp.keys("meta_l", "q")
+        time.sleep(2)
+
+        # log out to the login screen, then log back in
+        qmp.keys("meta_l", "shift", "e")
+        greeter = None
+        for _ in range(12):
+            time.sleep(5)
+            img = qmp.shot(os.path.join(out, "13-login-screen.png"))
+            cw, ch = img.size
+            if amber_pixels(img) < 50 and count_colour(img, (cw // 4, ch // 4, 3 * cw // 4, 3 * ch // 4), AMBER, 14) > 800:
+                greeter = img
+                break
+        check("logging out shows the Lumen login screen", greeter is not None)
+        if greeter is not None:
+            qmp.type("lumen\n")
+            time.sleep(5)
+            qmp.type("live\n")
+            back = None
+            for _ in range(24):
+                time.sleep(5)
+                img = qmp.shot(os.path.join(out, "14-logged-in-again.png"))
+                if amber_pixels(img) > 150:
+                    back = img
+                    break
+            check("logging in again from the login screen reaches the desktop", back is not None)
     except Exception as exc:  # keep whatever evidence there is
         ok = False
         results["error"] = repr(exc)
