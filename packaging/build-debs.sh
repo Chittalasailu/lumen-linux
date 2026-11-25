@@ -85,14 +85,16 @@ finish lumen-panel
 # ------------------------------------------------------------- lumen-launcher
 P=$STAGE/lumen-launcher
 control lumen-launcher all \
-    "fuzzel, procps" \
+    "fuzzel, procps, lumen-panel (= $VERSION)" \
     "libnotify-bin, papirus-icon-theme, foot" \
     "Lumen Linux application launcher
  Integration layer around the fuzzel application launcher: a toggle wrapper,
- user/system configuration layering, and a launcher theme generated from the
- shared Lumen palette."
+ user/system configuration layering, a window switcher and a session menu
+ (fuzzel dmenu mode; windows come from the compositor through lumen-panel's
+ Wayland client), and a launcher theme generated from the shared palette."
 mkdir -p "$P/usr/bin" "$P/usr/share/lumen-launcher"
 install -m 755 "$ROOT/components/lumen-launcher/bin/lumen-launcher" "$P/usr/bin/lumen-launcher"
+install -m 755 "$ROOT/components/lumen-launcher/bin/lumen-windows" "$P/usr/bin/lumen-windows"
 cp "$ROOT/components/lumen-launcher/data/fuzzel.ini" "$P/usr/share/lumen-launcher/fuzzel.ini"
 finish lumen-launcher
 

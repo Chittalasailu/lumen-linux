@@ -7,7 +7,10 @@
 #   * toggle    : the same key/button that opens the launcher also closes it
 #   * layered   : user config (~/.config/lumen/launcher.ini) wins over the
 #                 distribution config generated from the shared palette
-#   * modes     : one entry point for apps (default), --run and --dmenu
+#   * modes     : one entry point for apps (default), --run, --dmenu, plus
+#                 two desktop menus built on fuzzel's dmenu mode:
+#                   --windows  open windows, from the compositor (lumen-windows)
+#                   --session  lock, log out, restart, power off
 #   * graceful  : a clear notification instead of a silent failure
 #
 # Placement note: fuzzel anchors itself top-left with a zero exclusive zone.
@@ -41,8 +44,18 @@ case "$mode" in
     apps)  exec fuzzel --config "$conf" ;;
     --run) shift; exec fuzzel --config "$conf" --list-executables-in-path "$@" ;;
     --dmenu) shift; exec fuzzel --config "$conf" --dmenu "$@" ;;
+    --windows) exec lumen-windows ;;
+    --session)
+        choice=$(printf '%s\n' "Lock screen" "Log out" "Restart" "Power off" |
+            fuzzel --config "$conf" --dmenu --index --no-icons --prompt "Session  " --lines 4 --width 26) || exit 0
+        case "$choice" in
+            0) exec swaylock -f -c 0e1220 ;;
+            1) exec labwc --exit ;;
+            2) exec systemctl reboot ;;
+            3) exec systemctl poweroff ;;
+        esac ;;
     -h|--help)
-        echo "usage: lumen-launcher [--run | --dmenu [fuzzel args]]"
+        echo "usage: lumen-launcher [--run | --windows | --session | --dmenu [fuzzel args]]"
         exit 0 ;;
     *)
         echo "lumen-launcher: unknown mode '$mode'" >&2

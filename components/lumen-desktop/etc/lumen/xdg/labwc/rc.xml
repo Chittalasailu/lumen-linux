@@ -60,6 +60,8 @@
 
     <!-- launch -->
     <keybind key="W-space"><action name="Execute" command="lumen-launcher"/></keybind>
+    <keybind key="W-Tab"><action name="Execute" command="lumen-launcher --windows"/></keybind>
+    <keybind key="W-Escape"><action name="Execute" command="lumen-launcher --session"/></keybind>
     <keybind key="A-F2"><action name="Execute" command="lumen-launcher --run"/></keybind>
     <keybind key="W-Return"><action name="Execute" command="foot"/></keybind>
     <keybind key="W-e"><action name="Execute" command="thunar"/></keybind>

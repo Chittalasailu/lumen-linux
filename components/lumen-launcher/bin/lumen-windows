@@ -1,0 +1,45 @@
+#!/usr/bin/python3
+"""lumen-windows: pick an open window in the Lumen launcher and focus it.
+
+The window list comes from the compositor over wlr-foreign-toplevel-management,
+through the same client the panel's task list uses (lumen_panel.wayland). The
+list is shown with fuzzel's dmenu mode through lumen-launcher, so it has the
+launcher's look and configuration, with each window's application icon.
+
+Usually started as `lumen-launcher --windows` (Super+Tab).
+"""
+import subprocess
+import sys
+
+from lumen_panel.apps import icon_name
+from lumen_panel.wayland import Client, Unavailable
+
+
+def main() -> int:
+    try:
+        client = Client()
+    except Unavailable as exc:
+        print(f"lumen-windows: {exc}", file=sys.stderr)
+        return 1
+    windows = client.state.windows()
+    if not windows:
+        subprocess.run(["notify-send", "-a", "Lumen", "No open windows"], check=False)
+        return 0
+
+    # Rofi's extended dmenu format, which fuzzel understands: "text\0icon\x1fname".
+    lines = "".join(f"{w.label(70)}\0icon\x1f{icon_name(w.app_id)}\n" for w in windows)
+    # Preselect the first window that is not the focused one, like Alt+Tab.
+    start = next((i for i, w in enumerate(windows) if not w.active), 0)
+    picked = subprocess.run(
+        ["lumen-launcher", "--dmenu", "--index", "--prompt", "Windows  ", "--select-index", str(start)],
+        input=lines, capture_output=True, text=True, check=False,
+    ).stdout.strip()
+    if not picked.isdigit() or int(picked) >= len(windows):
+        return 0  # dismissed
+    client.activate(windows[int(picked)].key)
+    client.roundtrip()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
