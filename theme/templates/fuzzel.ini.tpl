@@ -3,10 +3,13 @@
 # shared palette. Colours are RRGGBBAA, no '#'.
 font={{ fonts.ui_family }}:size={{ fonts.ui_size }}
 prompt="  "
-# Adwaita, not Papirus: with Papirus-Dark fuzzel drew Firefox's icon at its native
-# size, covering the whole screen. Missing icons fall back to hicolor.
-icon-theme=Adwaita
+# The desktop's icon theme (GSettings), so the launcher, the panel and GTK apps
+# show the same application icons. Missing icons fall back to hicolor.
+icon-theme=Papirus-Dark
 icons-enabled=yes
+# When few matches are left fuzzel draws the selected entry's icon as a large image
+# filling most of the window (once taken for an icon-size bug). 1 turns that off.
+image-size-ratio=1
 # Fixed 96 dpi. With dpi-aware=auto the launcher scaled itself from the display's reported
 # physical size: a normal window under QEMU's gtk display drew it nearly full width with
 # oversized icons, while a headless display drew it small. Fixed scaling is predictable.
