@@ -77,9 +77,21 @@ class PanelWindow(Gtk.Window):
                 if mod is not None:
                     self.modules.append(mod)
                     box.pack_start(mod, False, False, 0)
-        root.pack_start(zones["left"], False, False, 0)
-        root.set_center_widget(zones["center"])
-        root.pack_end(zones["right"], False, False, 0)
+        # Side zones sit at their edge at natural size (halign) but own the space
+        # they may grow into (expand). Without expand, GtkBox gives a side zone only
+        # its minimum width once it would overlap its neighbour, and the task
+        # list's ellipsized titles collapse to "…".
+        zones["left"].set_halign(Gtk.Align.START)
+        zones["right"].set_halign(Gtk.Align.END)
+        root.pack_start(zones["left"], True, True, 0)
+        if self.cfg["layout"]["center"]:
+            # A centred zone splits the rest of the bar in two equal halves.
+            root.set_center_widget(zones["center"])
+            root.pack_end(zones["right"], True, True, 0)
+        else:
+            # No centre: the left zone (the task list) gets everything the right
+            # zone does not need.
+            root.pack_end(zones["right"], False, False, 0)
         self.add(root)
 
     def start(self) -> None:

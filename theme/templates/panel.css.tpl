@@ -48,6 +48,41 @@ window.lumen-panel.bottom { border-top: 1px solid {{ colors.border }}; }
 
 .lumen-panel .clock { font-weight: 600; }
 
+/* Workspace indicator: compact numbers, the current one in amber */
+.lumen-panel button.workspace {
+  background: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: none;
+  color: {{ colors.text_dim }};
+  border-radius: {{ metrics.radius }}px;
+  min-width: 22px;
+  min-height: 0;
+  padding: 2px 4px;
+  margin: 4px 0;
+}
+.lumen-panel button.workspace:hover  { background-color: {{ colors.surface_alt }}; color: {{ colors.text }}; }
+.lumen-panel button.workspace.active { background-color: {{ colors.surface_alt }}; color: {{ colors.accent }}; font-weight: 700; }
+.lumen-panel button.workspace.urgent { color: {{ colors.danger }}; }
+
+/* Task list: one flat button per window; the focused one gets an amber underline */
+.lumen-panel button.task {
+  background: transparent;
+  background-image: none;
+  border: none;
+  box-shadow: inset 0 -2px transparent;
+  color: {{ colors.text_dim }};
+  border-radius: 6px;
+  min-height: 0;
+  padding: 2px 10px;
+  margin: 4px 2px;
+}
+.lumen-panel button.task label        { color: {{ colors.text_dim }}; }
+.lumen-panel button.task:hover        { background-color: {{ colors.surface_alt }}; }
+.lumen-panel button.task.active       { background-color: {{ colors.surface_alt }}; box-shadow: inset 0 -2px {{ colors.accent }}; }
+.lumen-panel button.task.active label { color: {{ colors.text }}; }
+.lumen-panel button.task.minimized    { opacity: 0.6; }
+
 /* State colours driven by the modules */
 .lumen-panel .module.warn     label,
 .lumen-panel .module.warn     image { color: {{ colors.warn }}; }

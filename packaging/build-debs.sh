@@ -69,8 +69,10 @@ control lumen-panel all \
     "Lumen Linux desktop panel
  A Wayland panel written from scratch for Lumen Linux. It uses the
  wlr-layer-shell protocol (through gtk-layer-shell) to reserve screen space
- and offers launcher, clock, CPU, memory, network, volume, battery and
- session modules, configured with TOML and styled with CSS."
+ and offers launcher, workspace indicator, task list (ext-workspace and
+ wlr-foreign-toplevel-management, through pywayland), clock, CPU, memory,
+ network, volume, battery and session modules, configured with TOML and
+ styled with CSS."
 mkdir -p "$P/usr/bin" "$P/usr/lib/python3/dist-packages" "$P/usr/share/lumen-panel"
 install -m 755 "$ROOT/components/lumen-panel/bin/lumen-panel" "$P/usr/bin/lumen-panel"
 cp -r "$ROOT/components/lumen-panel/lumen_panel" "$P/usr/lib/python3/dist-packages/"

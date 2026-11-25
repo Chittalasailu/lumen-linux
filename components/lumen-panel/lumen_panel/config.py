@@ -27,11 +27,13 @@ DEFAULTS: dict[str, Any] = {
         "layer": "top",  # "top" keeps windows from covering it; "overlay" floats above
     },
     "layout": {
-        "left": ["launcher"],
-        "center": ["clock"],
-        "right": ["cpu", "memory", "network", "volume", "battery", "power"],
+        "left": ["launcher", "workspaces", "tasks"],
+        "center": [],
+        "right": ["cpu", "memory", "network", "volume", "battery", "clock", "power"],
     },
     "launcher": {"label": "Lumen", "command": ["lumen-launcher"]},
+    "workspaces": {"labels": "index"},  # "index" (1 2 3 4) or "name" (the compositor's names)
+    "tasks": {"max_chars": 22},
     "clock": {"format": "%a %d %b   %H:%M", "tooltip_format": "%A, %d %B %Y"},
     "cpu": {"interval": 2, "warn": 70, "critical": 90},
     "memory": {"interval": 3, "warn": 75, "critical": 90},

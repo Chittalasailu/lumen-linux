@@ -116,5 +116,7 @@ def load_builtin_modules() -> None:
         memory,
         network,
         power,
+        tasks,
         volume,
+        workspaces,
     )

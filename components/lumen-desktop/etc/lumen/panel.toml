@@ -7,9 +7,9 @@ position = "top"
 height = 36
 
 [layout]
-left   = ["launcher"]
-center = ["clock"]
-right  = ["cpu", "memory", "network", "volume", "battery", "power"]
+left   = ["launcher", "workspaces", "tasks"]
+center = []
+right  = ["cpu", "memory", "network", "volume", "battery", "clock", "power"]
 
 [power]
 lock = ["swaylock", "-f", "-c", "0e1220"]
