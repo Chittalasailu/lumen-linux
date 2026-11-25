@@ -3,9 +3,11 @@
 ## Boot test in CI (the shipped ISO, BIOS and UEFI)
 
 `tests/boot_test.py` boots the ISO in QEMU without a display and uses QEMU's QMP socket for
-screenshots, key presses and absolute mouse events. It passes only if the desktop appears after
-automatic login at 1360x768 and the calendar, session menu, launcher, notification, maximised
-window and volume scroll all behave. CI runs it for both firmware types after every build and
+screenshots, key presses and absolute mouse events. It passes only if every check holds: the
+branded boot menu, the desktop after automatic login at 1360x768, the panel's calendar, session
+menu, workspace indicator and task list, the launcher and its window switcher and session menu,
+the notification, volume scrolling, the Lumen GTK theme in Thunar, and logging out to the login
+screen and back in. Panel modules are located on the screenshot, not by fixed coordinates. CI runs it for both firmware types after every build and
 uploads the screenshots as the `boot-test-bios` and `boot-test-uefi` artifacts (about 600 KB each).
 To run it yourself on Linux:
 
@@ -50,6 +52,9 @@ line when you demo it.
 **Panel (from scratch)**
 - [ ] Panel visible at the top, full width, on top of the wallpaper
 - [ ] A maximised window stops *below* the panel (exclusive zone working)
+- [ ] Workspace numbers on the left; `Super+2` moves the amber highlight; scrolling over them switches
+- [ ] Every window has a task button with its app icon; the focused one is underlined in amber;
+      clicking it minimises it, clicking again restores it; middle click closes it
 - [ ] Clock updates; clicking it opens the calendar popover
 - [ ] CPU and memory values change when a load is started (`yes > /dev/null`)
 - [ ] Network shows `Wired` in QEMU user networking
@@ -62,6 +67,8 @@ line when you demo it.
 
 **Launcher (customised)**
 - [ ] `Super+Space` opens it under the panel; pressing it again closes it
+- [ ] `Super+Tab` lists open windows with icons; Enter focuses the chosen one
+- [ ] `Super+Escape` offers lock, log out, restart, power off
 - [ ] The **Lumen** panel button opens it; typing filters applications; Enter starts one
 - [ ] Colours match the panel and window borders
 
@@ -82,9 +89,9 @@ If the screen stays black in QEMU, try `-device virtio-vga` (default) and confir
 |---|---|---|
 | 0:00 | Terminal: `make iso` finished, `ls -lh dist/`; then QEMU command | Reproducible Debian 13 ISO built with live-build in a container |
 | 0:15 | Boot, auto login, desktop appears | Live image, greetd autologin into a labwc Wayland session |
-| 0:30 | Panel: hover modules, click clock calendar, scroll volume | The panel is written from scratch on wlr-layer-shell |
+| 0:30 | Panel: switch workspaces, click task buttons, clock calendar, scroll volume | The panel is written from scratch on wlr-layer-shell, ext-workspace and foreign-toplevel |
 | 0:50 | Maximise a window; it stops under the panel | The panel reserves space with an exclusive zone; the compositor does the rest |
-| 1:05 | `Super+Space`: launcher; start Terminal; press again to close | fuzzel, customised: palette theme, toggle wrapper, panel integration |
+| 1:05 | `Super+Space`: launcher; start Terminal; `Super+Tab` window switcher | fuzzel, customised: palette theme, toggle, window switcher and session menu |
 | 1:25 | Edit `~/.config/lumen/panel.toml` live (position or layout) | Config and CSS hot-reload |
 | 1:40 | Open a notification, Thunar, terminal | One palette generates every surface |
 | 1:50 | `sh -c 'cat /etc/os-release \| head -3'`, `dpkg -l 'lumen-*'` | Shipped as proper Debian packages |

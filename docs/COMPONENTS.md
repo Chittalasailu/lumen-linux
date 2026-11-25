@@ -24,10 +24,38 @@ lumen_panel/
   theme.py        ThemeLoader: shipped CSS (APPLICATION priority) + user CSS (USER priority)
   sysinfo.py      pure parsers: /proc/stat, /proc/meminfo, sysfs battery & network, wpctl output
   util.py         non-blocking subprocess helpers on Gio.Subprocess
-  modules/        launcher, clock, cpu, memory, network, volume, battery, power
+  wayland.py      second Wayland connection: foreign-toplevel + ext-workspace client (pywayland)
+  wlstate.py      pure window/workspace state and protocol decoding
+  apps.py         app_id -> desktop entry and icon (Gio)
+  protocols/      Python bindings generated from protocols/*.xml (tools/gen-protocols.sh)
+  modules/        launcher, workspaces, tasks, clock, cpu, memory, network, volume, battery, power
+protocols/        vendored protocol XML: wlr-foreign-toplevel-management-v1, ext-workspace-v1
 bin/lumen-panel   wrapper that preloads libgtk-layer-shell
-tests/            22 unit tests (sysinfo, config); no display required
+tests/            35 unit tests (sysinfo, config, window/workspace state); no display required
 ```
+
+### Windows and workspaces: a second Wayland connection
+
+GTK owns the panel's main Wayland connection and only speaks the protocols it needs to draw.
+A task list and a workspace indicator need two more, so `wayland.py` opens **its own connection**
+to the same compositor (through pywayland) and binds:
+
+| Protocol | Global | Gives the panel | Requests used |
+|---|---|---|---|
+| wlr-foreign-toplevel-management v3 | `zwlr_foreign_toplevel_manager_v1` | one handle per window: title, app_id, state (activated, minimised, maximised, fullscreen) | `activate(seat)`, `set_minimized`, `unset_minimized`, `close` |
+| ext-workspace v1 (wayland-protocols staging) | `ext_workspace_manager_v1` | workspaces: name, coordinates, state (active, urgent, hidden) | `activate` + `commit` |
+| core | `wl_seat` | the seat named in `activate` | |
+
+Both protocols batch property events and close each batch with `done`; the client calls its
+subscribers once per batch, so a window that changes title and state redraws once. The
+connection's file descriptor is watched by the GLib main loop (`GLib.unix_fd_add_full`) and
+events are dispatched when it becomes readable, so nothing blocks and no thread is needed. One
+connection is shared by every module on every monitor. If pywayland is missing or the
+compositor lacks the protocols, the two modules hide themselves and the rest of the panel runs.
+
+pywayland ships only the core protocol, so the XML of both protocols is vendored in
+`protocols/` and `tools/gen-protocols.sh` generates the bindings (committed, like the theme).
+The script also breaks an import cycle the generator produces for ext-workspace (handle ↔ group).
 
 ### How it talks to the compositor
 
@@ -61,6 +89,8 @@ config reload leak-free: a reload tears windows down and rebuilds them.
 | Module | Source of data | Interaction |
 |---|---|---|
 | `launcher` | n/a | click: run `lumen-launcher` |
+| `workspaces` | ext-workspace | click: switch; scroll: next/previous; the current one is amber |
+| `tasks` | wlr-foreign-toplevel | click: focus, or minimise the focused window; middle click: close. Icons from the app's desktop entry; titles ellipsize so many windows share the space |
 | `clock` | `time.localtime()` | click: calendar popover; `format` is strftime |
 | `cpu` | `/proc/stat` deltas | warn/critical colour thresholds |
 | `memory` | `/proc/meminfo` (total − available) | warn/critical thresholds |
@@ -73,8 +103,8 @@ Design rules followed throughout:
 
 * **Never block the main loop.** All commands go through `Gio.Subprocess` with async completion.
 * **Isolate failures.** A timer callback that raises is logged and the next tick still runs.
-* **Separate logic from GTK.** `sysinfo.py` and `config.py` import nothing graphical, which is
-  what lets the 22 unit tests run in CI without a compositor.
+* **Separate logic from GTK.** `sysinfo.py`, `config.py` and `wlstate.py` import nothing
+  graphical, which is what lets the 35 unit tests run in CI without a compositor.
 * **Degrade quietly.** Missing `wpctl`, no battery, no wireless: the module shows `n/a` or hides.
 
 ### Reload
@@ -98,10 +128,10 @@ Add the file to `load_builtin_modules()` and name it in `layout.right`.
 
 ### Known limitations
 
-* No task list / window switcher. That needs the `wlr-foreign-toplevel-management` protocol,
-  which GTK does not expose; it would require a Wayland client binding (for example
-  `pywayland`). labwc's own Alt+Tab switcher covers window switching meanwhile.
-* No system tray (StatusNotifierItem) and no workspace indicator.
+* No system tray (StatusNotifierItem).
+* The task list shows the windows of every output and workspace: neither protocol, as labwc
+  0.8 implements them, says which workspace a window is on. Activating a window on another
+  workspace switches to it.
 * Popover placement relies on GTK's xdg_popup handling for layer surfaces.
 
 ---
@@ -113,14 +143,16 @@ integration:
 
 | Customisation | Where | Why it matters |
 |---|---|---|
-| Theme generated from the shared palette | `theme/templates/fuzzel.ini.tpl` | identical colours, radius, border and font as the panel and windows |
+| Theme generated from the shared palette | `theme/templates/fuzzel.ini.tpl` | identical colours, radius, border and font as the panel and windows; the desktop's Papirus-Dark icons; fixed 96 dpi; fuzzel's large single-match image turned off (`image-size-ratio=1`), which had drawn one icon over the whole list |
 | Toggle behaviour | `bin/lumen-launcher` | one key or button opens *and* closes the launcher (fuzzel alone only opens) |
 | Config layering | `bin/lumen-launcher` | `~/.config/lumen/launcher.ini` replaces the distribution theme without editing system files |
-| Three modes | `bin/lumen-launcher` | apps (default), `--run` (executables in `PATH`), `--dmenu` (scripting) |
+| Five modes | `bin/lumen-launcher` | apps (default), `--run` (executables in `PATH`), `--dmenu` (scripting), `--windows`, `--session` |
+| Window switcher | `bin/lumen-windows` | `Super+Tab`: open windows with their app icons in the launcher; pick one to focus it. The list comes from the compositor through lumen-panel's foreign-toplevel client, and is shown through fuzzel's dmenu mode in the launcher's own theme |
+| Session menu | `bin/lumen-launcher --session` | `Super+Escape`: lock, log out, restart, power off from the keyboard |
 | Panel-aware placement | `fuzzel.ini` (`anchor=top-left`, zone 0) | the compositor places it inside the usable area, so it opens under the panel with no hard-coded offsets |
 | Panel integration | `lumen-panel` launcher module | the **Lumen** button runs the wrapper |
-| Compositor integration | `rc.xml` | `Super+Space`, `Alt+F2`, root-menu entry |
-| Packaging | `lumen-launcher` `.deb` | depends on fuzzel, recommends icon theme and notifications |
+| Compositor integration | `rc.xml` | `Super+Space`, `Alt+F2`, `Super+Tab`, `Super+Escape`, root-menu entry |
+| Packaging | `lumen-launcher` `.deb` | depends on fuzzel and lumen-panel (window list), recommends icon theme and notifications |
 | Graceful failure | `bin/lumen-launcher` | if fuzzel is missing, a notification and a non-zero exit instead of nothing |
 
 Fuzzel was chosen because it is itself a layer-shell client, so it behaves correctly with the

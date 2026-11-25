@@ -5,8 +5,8 @@ A Debian 13 ("trixie") based live distribution with a Wayland desktop built on t
 
 | Component | Role | Origin |
 |---|---|---|
-| **lumen-panel** | Desktop panel / status bar | **Written from scratch** (Python, GTK3, wlr-layer-shell) |
-| **lumen-launcher** | Application launcher | **Customised and integrated** [fuzzel](https://codeberg.org/dnkl/fuzzel) |
+| **lumen-panel** | Desktop panel / status bar: workspaces, task list, system status | **Written from scratch** (Python, GTK3, wlr-layer-shell, plus its own ext-workspace and wlr-foreign-toplevel client) |
+| **lumen-launcher** | Application launcher, window switcher, session menu | **Customised and integrated** [fuzzel](https://codeberg.org/dnkl/fuzzel) |
 
 Everything visual (compositor decorations, panel, launcher, GTK theme, terminal,
 notifications, wallpaper) is generated from one palette file, so the desktop has a single
@@ -22,34 +22,44 @@ consistent identity: **Lumen Dusk**, deep navy surfaces with an amber accent.
 
 Every push builds the ISO in CI and then **boots it headless in QEMU under both BIOS and UEFI**
 ([tests/boot_test.py](tests/boot_test.py)). The test waits for automatic login, then drives the
-desktop through QEMU's control socket, saves a screenshot at each step and fails if a check
-fails. The latest run passed all 8 checks on both firmware types:
+desktop through QEMU's control socket, saves a screenshot at each step and fails if any check
+fails. Panel modules are found on the screenshot rather than by fixed coordinates. All 17 checks
+pass on both firmware types:
 
-| Check | BIOS | UEFI |
-|---|---|---|
-| Desktop reached after automatic login (no manual steps) | 40 s | 115 s |
-| Screen is 1360x768 (virtual-GPU mode set by the session) | pass | pass |
-| Clock click opens the calendar below the panel | pass | pass |
-| Power icon opens the session menu below the panel | pass | pass |
-| `Super+Space` opens the launcher | pass | pass |
-| Launcher draws no oversized icon (a bug found earlier) | pass | pass |
-| Terminal opens and a notification appears | pass | pass |
-| Scrolling over the volume module changes it | pass | pass |
+| Check | What it proves |
+|---|---|
+| Boot menu carries the Lumen branding | palette splash, isolinux colours and GRUB theme in the image |
+| Desktop reached after automatic login, at 1360x768 | live user, greetd autologin, labwc session, virtual-GPU mode |
+| Clock opens the calendar; power icon opens the session menu | panel popovers on a layer-shell surface |
+| Workspace indicator follows `Super+2` | panel's ext-workspace client |
+| A new window appears in the task list | panel's wlr-foreign-toplevel client |
+| Scrolling over the volume module changes it | panel → WirePlumber |
+| `Super+Space` opens the launcher, with no oversized icon | fuzzel integration and theme |
+| `Super+Escape` opens the session menu | launcher session mode |
+| `Super+Tab` opens the window switcher, with no oversized icon | launcher window switcher over foreign-toplevel |
+| A notification appears top right with the amber border | mako, themed from the palette |
+| Thunar shows the Lumen selection colour and no Adwaita blue | recoloured GTK theme + GSettings defaults |
+| Logging out shows the Lumen login screen; logging in again works | greetd + gtkgreet in cage |
 
-Boot-testing found and fixed several bugs, all visible in the git history: the live user was never
-created, a console login competed with greetd for the first VT, the launcher drew one icon at
-full-screen size, and the panel's popovers opened off-screen. Screenshots below were captured
-from the built ISO by that test: [desktop](docs/screenshots/desktop.png),
-[calendar](docs/screenshots/panel-calendar.png), [session menu](docs/screenshots/panel-power-menu.png),
-[launcher](docs/screenshots/launcher.png),
-[terminal with notification](docs/screenshots/terminal-notification.png).
+The desktop appears 85 s after the boot menu in software emulation on Apple Silicon (no KVM).
+Boot-testing found and fixed real bugs, all in the git history, for example: the live user was
+never created, a console login competed with greetd for the first VT, the panel's popovers opened
+off-screen, GTK apps ignored the theme, and Debian's pywayland lacks a dependency on the cffi
+runtime.
+
+Screenshots, all captured from the built ISO by that test:
+[desktop with task list and Lumen GTK theme](docs/screenshots/desktop.png),
+[calendar](docs/screenshots/panel-calendar.png), [panel session menu](docs/screenshots/panel-power-menu.png),
+[launcher](docs/screenshots/launcher.png), [window switcher](docs/screenshots/window-switcher.png),
+[launcher session menu](docs/screenshots/session-menu.png),
+[terminal with notification](docs/screenshots/terminal-notification.png),
+[login screen](docs/screenshots/login-screen.png),
+boot menu [BIOS](docs/screenshots/boot-menu-bios.png) / [UEFI](docs/screenshots/boot-menu-uefi.png).
 
 Also checked by hand on the built ISO: moving the panel to the bottom edge through
-`~/.config/lumen/panel.toml` (live reload, popovers open upwards), lock and unlock, the run
-launcher (`Alt+F2`), the file manager in the Lumen GTK theme, and logging out to the graphical
-login screen. Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi and
-audio output. Everything above ran on virtual devices. In plain software emulation without KVM the desktop takes 2 to 3 minutes to
-appear; with KVM it takes under two minutes.
+`~/.config/lumen/panel.toml` (live reload, popovers open upwards), lock and unlock, and the run
+launcher (`Alt+F2`). Not yet verified: GPU-accelerated rendering (`GL=1`), real hardware, Wi-Fi
+and audio output; everything above ran on virtual devices.
 Work through [docs/TESTING.md](docs/TESTING.md) to repeat the checks by hand.
 
 ## Build the ISO
@@ -129,6 +139,8 @@ The boot menu defaults to the live system; the desktop appears after the automat
 | Keys | Action |
 |---|---|
 | `Super+Space` or the **Lumen** button | Application launcher (press again to close) |
+| `Super+Tab` | Window switcher (open windows, in the launcher) |
+| `Super+Escape` | Session menu: lock, log out, restart, power off |
 | `Alt+F2` | Run a command |
 | `Super+Return` | Terminal (foot) |
 | `Super+E` / `Super+B` | Files / Web browser |
@@ -139,8 +151,10 @@ The boot menu defaults to the live system; the desktop appears after the automat
 | `Super+L` | Lock screen |
 | `Super+Shift+R` / `Super+Shift+E` | Reload compositor config / log out |
 
-Panel: click the clock for a calendar, scroll on the volume to change it, click it to mute
-(right-click opens the mixer), click the power icon for lock/logout/restart/power off.
+Panel, left to right: the **Lumen** launcher button; workspace numbers (click or scroll to
+switch); a task button per window (click to focus, click the focused one to minimise, middle
+click to close); system status; the clock (click for a calendar); the power icon. Scroll on the
+volume to change it, click it to mute (right-click opens the mixer).
 
 ## Customising
 

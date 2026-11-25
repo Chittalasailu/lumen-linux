@@ -94,8 +94,20 @@ owned by another user, which git otherwise refuses), deterministic theme generat
 and a CI freshness check. What is not: live-build embeds timestamps and some ordering, so the
 ISO is repeatable in *inputs*, not bit-identical. The README states this plainly.
 
+## Task list over a second Wayland connection
+
+GTK3 has no API for other clients' windows or for workspaces, and its Wayland connection is
+private. The panel therefore opens a second connection with pywayland (packaged in Debian)
+for wlr-foreign-toplevel-management and ext-workspace, integrated into the GLib main loop
+through the connection's file descriptor. *Alternatives:* labwc's IPC does not exist; parsing
+the compositor's state from outside is not possible on Wayland by design; a C extension for
+the protocols would add a compiler to the build. *Trade-off:* pywayland's generator needs a
+small post-processing step (an import cycle in ext-workspace), kept in `tools/gen-protocols.sh`.
+The clock moved from the centre to the right group so the task list can use the middle of the
+bar, as on most desktops.
+
 ## Left out on purpose
 
-Task list / system tray in the panel (need protocol bindings outside GTK), an installer
+A system tray in the panel (StatusNotifierItem is a D-Bus protocol with its own menu model), an installer
 (`--debian-installer none`; the ISO is a live system), boot-time splash (Plymouth), Secure Boot
 signing.

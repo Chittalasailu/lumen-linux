@@ -90,6 +90,8 @@ implementations), which is the part not worth rewriting for a six-day project.
 |---|---|---|
 | `xdg_shell` | every normal window | toplevel/popup windows, maximise, fullscreen |
 | `wlr-layer-shell-unstable-v1` | panel, launcher, mako, swaybg, slurp | surfaces that are *not* windows: placed on a layer, anchored to edges, optionally reserving space |
+| `wlr-foreign-toplevel-management-unstable-v1` | panel task list, launcher window switcher | other clients' windows: title, app_id, state; activate, minimise, close |
+| `ext-workspace-v1` | panel workspace indicator | the compositor's workspaces and which is active; switch |
 | `xdg-decoration` | labwc, GTK/Qt clients | server-side titlebars so all windows look uniform |
 | `wlr-screencopy` | grim | screenshots |
 | `wl_data_device` / `wlr-data-control` | wl-clipboard | clipboard |
