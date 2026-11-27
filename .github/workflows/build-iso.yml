@@ -31,6 +31,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    # Publishing the release for a v* tag writes to the repository; the default
+    # workflow token is read-only.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - name: Free disk space (the image build needs ~10 GB)
