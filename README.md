@@ -12,6 +12,11 @@ Everything visual (compositor decorations, panel, launcher, GTK theme, terminal,
 notifications, wallpaper) is generated from one palette file, so the desktop has a single
 consistent identity: **Lumen Dusk**, deep navy surfaces with an amber accent.
 
+**Demo:** [2-minute video](https://github.com/Chittalasailu/lumen-linux/releases/download/v1.0.0/lumen-linux-demo.mp4)
+of the distribution and both desktop components: boot, login, the panel (workspaces, task
+list, status), the launcher with its window switcher and session menu, live configuration and
+theming.
+
 **Download:** the ready-built ISO and its SHA-256 are on the
 [v1.0.0 release](https://github.com/Chittalasailu/lumen-linux/releases/tag/v1.0.0); see
 [Run in QEMU](#run-in-qemu) to boot it, or [Build the ISO](#build-the-iso) to build it yourself.
